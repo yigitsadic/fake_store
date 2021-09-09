@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"google.golang.org/grpc"
 	"log"
@@ -31,6 +32,12 @@ func main() {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver}))
 
 	r := chi.NewRouter()
+	r.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:9000"},
+		AllowCredentials: true,
+		Debug:            true,
+	}).Handler)
+
 	r.Use(middleware.Heartbeat("/readiness"))
 
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
