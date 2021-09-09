@@ -1,23 +1,31 @@
 import React from "react";
-import {User} from "../../user";
-import {useHistory} from "react-router-dom";
+import {Redirect} from "react-router-dom";
 import {AuthInterface} from "../nav-bar/auth-interface";
+import {useLoginMutation} from "../../generated/graphql";
 
 const LoginPage: React.FC<AuthInterface> = ({setCurrentUser}) => {
-    const history = useHistory();
+    const [loginUser, {data,loading, error}] = useLoginMutation();
 
-    const user = {
-        fullName: "Yiğit Sadıç",
-        id: "12312",
-        avatar: "https://avatars.dicebear.com/api/human/c5608998bd4d4e969b1e4b558833199c.svg"
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Unable to send request due to {error.message}</div>;
+    }
+
+    if (data && setCurrentUser) {
+        setCurrentUser({
+            id: data.login.id,
+            fullName: data.login.fullName,
+            avatar: data.login.avatar,
+        })
+
+        return <Redirect to="/" />
     }
 
     const handleLogin = () => {
-        if (setCurrentUser) {
-            setCurrentUser(user);
-        }
-
-        history.push("/")
+        loginUser();
     }
 
     return <div className="container-fluid">
