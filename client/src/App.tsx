@@ -1,17 +1,20 @@
-import React from "react";
+import React, {useState} from "react";
 import NavBar from "./components/nav-bar/NavBar";
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 import LoginPage from "./components/login/LoginPage";
+import {User} from "./user";
 
 const App: React.FC = () => {
+    const [currentUser, setCurrentUser] = useState<User>();
+
     return (
         <BrowserRouter>
-            <NavBar />
+            <NavBar currentUser={currentUser} setCurrentUser={setCurrentUser} />
 
             <div className="container-fluid">
                 <Switch>
                     <Route path="/login">
-                        <LoginPage />
+                        <LoginPage setCurrentUser={setCurrentUser} />
                     </Route>
 
                     <Route path="/products">
