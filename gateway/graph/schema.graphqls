@@ -1,0 +1,14 @@
+type Query {
+  sayHello: String!
+}
+
+type LoginResponse {
+  id: ID!
+  avatar: String!
+  fullName: String!
+  token: String!
+}
+
+type Mutation {
+  login: LoginResponse!
+}

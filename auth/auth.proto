@@ -1,0 +1,17 @@
+syntax = "proto3";
+package auth;
+
+option go_package = "client/client";
+
+message AuthRequest {}
+
+message UserResponse {
+  string id = 1;
+  string avatar = 2;
+  string fullName = 3;
+  string jwtToken = 4;
+}
+
+service AuthService {
+  rpc LoginUser(AuthRequest) returns (UserResponse) {}
+}
