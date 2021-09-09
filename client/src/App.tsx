@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import NavBar from "./components/nav-bar/NavBar";
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 import LoginPage from "./components/login/LoginPage";
-import {User} from "./user";
+import {User} from "./components/login/user";
 
 const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User>();

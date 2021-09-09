@@ -1,7 +1,7 @@
 import React from "react";
 import {Redirect} from "react-router-dom";
-import {AuthInterface} from "../nav-bar/auth-interface";
 import {useLoginMutation} from "../../generated/graphql";
+import {AuthInterface} from "./auth-interface";
 
 const LoginPage: React.FC<AuthInterface> = ({setCurrentUser}) => {
     const [loginUser, {data,loading, error}] = useLoginMutation();
