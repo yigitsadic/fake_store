@@ -16,3 +16,11 @@ services:
     build:
       context: .
       dockerfile: ./auth/Dockerfile
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
