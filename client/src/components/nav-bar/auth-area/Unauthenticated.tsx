@@ -1,7 +1,7 @@
 import React from "react";
 import {useLoginMutation} from "../../../generated/graphql";
-import {login} from "../../../features/auth/auth";
-import {useAppDispatch} from "../../../app/hooks";
+import {login} from "../../../store/auth/auth";
+import {useAppDispatch} from "../../../store/hooks";
 
 const Unauthenticated: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -12,6 +12,7 @@ const Unauthenticated: React.FC = () => {
             id: data.login.id,
             fullName: data.login.fullName,
             avatar: data.login.avatar,
+            loggedIn: true,
         }));
     }
 

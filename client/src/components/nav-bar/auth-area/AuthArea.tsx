@@ -1,11 +1,11 @@
 import React from "react";
-import {useAppSelector} from "../../../app/hooks";
-import {selectLoggedIn} from "../../../features/auth/auth";
 import AuthenticatedUser from "./AuthenticatedUser";
 import Unauthenticated from "./Unauthenticated";
+import {useAppSelector} from "../../../store/hooks";
+import {selectedCurrentUser} from "../../../store/auth/auth";
 
 const AuthArea: React.FC = () => {
-    const loggedIn = useAppSelector(selectLoggedIn);
+    const { loggedIn } = useAppSelector(selectedCurrentUser);
 
     return loggedIn ? <AuthenticatedUser /> :  <Unauthenticated />;
 }

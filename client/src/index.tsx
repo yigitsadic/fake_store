@@ -5,8 +5,8 @@ import App from "./App";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
 import {Provider} from "react-redux";
-import {store} from "./app/store";
 import {BrowserRouter} from "react-router-dom";
+import {store} from "./store/store";
 
 const client = new ApolloClient({
     uri: 'http://localhost:3035/query',

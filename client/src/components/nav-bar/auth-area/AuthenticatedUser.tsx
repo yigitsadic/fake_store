@@ -1,10 +1,10 @@
 import React from "react";
-import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {logout, selectUser} from "../../../features/auth/auth";
+import {logout, selectedCurrentUser} from "../../../store/auth/auth";
+import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 
 const AuthenticatedUser: React.FC = () => {
     const dispatch = useAppDispatch();
-    const currentUser = useAppSelector(selectUser);
+    const currentUser = useAppSelector(selectedCurrentUser);
 
     return <>
         <button type="button" className="btn btn-primary position-relative">
