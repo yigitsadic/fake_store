@@ -1,10 +1,10 @@
 import React from "react";
 import NavBar from "./components/nav-bar/NavBar";
-import {BrowserRouter, Route, Switch} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 
 const App: React.FC = () => {
     return (
-        <BrowserRouter>
+        <>
             <NavBar />
 
             <div className="container-fluid">
@@ -26,7 +26,7 @@ const App: React.FC = () => {
                     </Route>
                 </Switch>
             </div>
-        </BrowserRouter>
+        </>
     );
 };
 

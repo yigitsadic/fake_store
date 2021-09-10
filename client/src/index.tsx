@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
 import {Provider} from "react-redux";
 import {store} from "./app/store";
+import {BrowserRouter} from "react-router-dom";
 
 const client = new ApolloClient({
     uri: 'http://localhost:3035/query',
@@ -16,7 +17,9 @@ ReactDOM.render(
     <React.StrictMode>
         <Provider store={store}>
             <ApolloProvider client={client}>
-                <App />
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
             </ApolloProvider>
         </Provider>
     </React.StrictMode>,
