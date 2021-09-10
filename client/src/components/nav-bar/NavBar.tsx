@@ -1,10 +1,9 @@
 import React from "react";
 import Links from "./Links";
 import { Link } from "react-router-dom";
-import AuthArea from "./AuthArea";
-import {AuthInterface} from "../login/auth-interface";
+import AuthArea from "./auth-area/AuthArea";
 
-const NavBar: React.FC<AuthInterface> = ({currentUser, setCurrentUser}) => {
+const NavBar: React.FC = () => {
     return (
         <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">
             <div className="container-fluid">
@@ -17,7 +16,7 @@ const NavBar: React.FC<AuthInterface> = ({currentUser, setCurrentUser}) => {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarCollapse">
                     <Links />
-                    <AuthArea currentUser={currentUser} setCurrentUser={setCurrentUser} />
+                    <AuthArea />
                 </div>
             </div>
         </nav>
