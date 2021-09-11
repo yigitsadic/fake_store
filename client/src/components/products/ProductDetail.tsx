@@ -34,7 +34,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                         </button>
                     </div>
 
-                    <small className="text-muted">{product.price} EUR</small>
+                    <small className="text-muted">
+                        {product.price.toFixed(2)} EUR
+                    </small>
                 </div>
             </div>
         </div>
