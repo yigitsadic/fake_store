@@ -1,4 +1,8 @@
 import React from "react";
+import {useRemoveFromCartMutation} from "../../generated/graphql";
+import {useAppDispatch} from "../../store/hooks";
+import {CART_QUERY} from "./cart-content-query";
+import {CART_ITEM_COUNT_QUERY} from "../nav-bar/cart-link/cart-item-count-query";
 
 interface CartItemProps {
     item: {
@@ -11,6 +15,17 @@ interface CartItemProps {
 }
 
 const CartItem:React.FC<CartItemProps> = ({ item }: CartItemProps) => {
+    const dispatch = useAppDispatch();
+    const [removeFromCartFn, { loading, error }] = useRemoveFromCartMutation();
+
+    const handleRemoveFromCart = () => {
+        removeFromCartFn({
+            variables: {
+                productId: item.id,
+            },
+            refetchQueries: [{ query: CART_QUERY }, {query: CART_ITEM_COUNT_QUERY}],
+        });
+    }
 
     return <>
         <div className="card mb-3">
@@ -28,8 +43,10 @@ const CartItem:React.FC<CartItemProps> = ({ item }: CartItemProps) => {
 
                             <div className="btn-group">
                                 <button type="button"
-                                        className="btn btn-sm btn-outline-danger">
-                                    Remove from Cart
+                                        className="btn btn-sm btn-outline-danger"
+                                        onClick={() => handleRemoveFromCart()}
+                                        disabled={loading}>
+                                    {error ? "Try again..." : (loading ? "Working..." : "Remove from Cart")}
                                 </button>
                             </div>
                         </div>

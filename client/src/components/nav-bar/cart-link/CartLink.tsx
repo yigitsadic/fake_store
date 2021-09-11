@@ -1,14 +1,13 @@
 import React from "react";
-import {selectCartCount} from "../../store/auth/auth";
-import {useAppSelector} from "../../store/hooks";
+import {useCartCurrentItemCountQuery} from "../../../generated/graphql";
 
 const CartLink: React.FC = () => {
-    const cartCount = useAppSelector(selectCartCount);
+    const {data} = useCartCurrentItemCountQuery();
 
-    if (cartCount > 0) {
+    if (data && data.cart.itemsCount > 0) {
         return <button type="button" className="btn btn-sm btn-outline-info position-relative">
             Cart
-            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{cartCount}
+            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{data.cart.itemsCount}
                 <span className="visually-hidden">items in cart</span>
             </span>
         </button>

@@ -75,10 +75,22 @@ export type CartContentQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type CartContentQuery = { __typename?: 'Query', cart: { __typename?: 'Cart', items?: Maybe<Array<{ __typename?: 'CartItem', id: string, title: string, description: string, price: number, image: string }>> } };
 
+export type RemoveFromCartMutationVariables = Exact<{
+  productId: Scalars['ID'];
+}>;
+
+
+export type RemoveFromCartMutation = { __typename?: 'Mutation', removeFromCart: { __typename?: 'Cart', itemsCount: number } };
+
 export type LoginMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResponse', id: string, avatar: string, fullName: string, token: string } };
+
+export type CartCurrentItemCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CartCurrentItemCountQuery = { __typename?: 'Query', cart: { __typename?: 'Cart', itemsCount: number } };
 
 export type AddItemToCartMutationVariables = Exact<{
   productId: Scalars['ID'];
@@ -133,6 +145,39 @@ export function useCartContentLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type CartContentQueryHookResult = ReturnType<typeof useCartContentQuery>;
 export type CartContentLazyQueryHookResult = ReturnType<typeof useCartContentLazyQuery>;
 export type CartContentQueryResult = Apollo.QueryResult<CartContentQuery, CartContentQueryVariables>;
+export const RemoveFromCartDocument = gql`
+    mutation removeFromCart($productId: ID!) {
+  removeFromCart(productId: $productId) {
+    itemsCount
+  }
+}
+    `;
+export type RemoveFromCartMutationFn = Apollo.MutationFunction<RemoveFromCartMutation, RemoveFromCartMutationVariables>;
+
+/**
+ * __useRemoveFromCartMutation__
+ *
+ * To run a mutation, you first call `useRemoveFromCartMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveFromCartMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeFromCartMutation, { data, loading, error }] = useRemoveFromCartMutation({
+ *   variables: {
+ *      productId: // value for 'productId'
+ *   },
+ * });
+ */
+export function useRemoveFromCartMutation(baseOptions?: Apollo.MutationHookOptions<RemoveFromCartMutation, RemoveFromCartMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveFromCartMutation, RemoveFromCartMutationVariables>(RemoveFromCartDocument, options);
+      }
+export type RemoveFromCartMutationHookResult = ReturnType<typeof useRemoveFromCartMutation>;
+export type RemoveFromCartMutationResult = Apollo.MutationResult<RemoveFromCartMutation>;
+export type RemoveFromCartMutationOptions = Apollo.BaseMutationOptions<RemoveFromCartMutation, RemoveFromCartMutationVariables>;
 export const LoginDocument = gql`
     mutation login {
   login {
@@ -168,6 +213,40 @@ export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginM
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
 export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export const CartCurrentItemCountDocument = gql`
+    query cartCurrentItemCount {
+  cart {
+    itemsCount
+  }
+}
+    `;
+
+/**
+ * __useCartCurrentItemCountQuery__
+ *
+ * To run a query within a React component, call `useCartCurrentItemCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCartCurrentItemCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCartCurrentItemCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCartCurrentItemCountQuery(baseOptions?: Apollo.QueryHookOptions<CartCurrentItemCountQuery, CartCurrentItemCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CartCurrentItemCountQuery, CartCurrentItemCountQueryVariables>(CartCurrentItemCountDocument, options);
+      }
+export function useCartCurrentItemCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CartCurrentItemCountQuery, CartCurrentItemCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CartCurrentItemCountQuery, CartCurrentItemCountQueryVariables>(CartCurrentItemCountDocument, options);
+        }
+export type CartCurrentItemCountQueryHookResult = ReturnType<typeof useCartCurrentItemCountQuery>;
+export type CartCurrentItemCountLazyQueryHookResult = ReturnType<typeof useCartCurrentItemCountLazyQuery>;
+export type CartCurrentItemCountQueryResult = Apollo.QueryResult<CartCurrentItemCountQuery, CartCurrentItemCountQueryVariables>;
 export const AddItemToCartDocument = gql`
     mutation addItemToCart($productId: ID!) {
   addToCart(productId: $productId) {

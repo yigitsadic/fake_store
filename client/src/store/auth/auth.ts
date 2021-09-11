@@ -2,12 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {User} from "./user";
 import {RootState} from "../store";
 
-export interface AppState {
+export interface AuthState {
     user: User;
     cartItemCount: number;
 }
 
-const initialState: AppState = {
+const initialState: AuthState = {
     user: {
         loggedIn: false,
     },
@@ -25,14 +25,10 @@ export const authSlice = createSlice({
             localStorage.removeItem("fake_store_token");
             state.user = { loggedIn: false };
         },
-        updateCartCount: (state, action: PayloadAction<number>) => {
-            state.cartItemCount = action.payload;
-        },
     },
 });
 
-export const { login, logout, updateCartCount } = authSlice.actions;
+export const { login, logout } = authSlice.actions;
 export const selectedCurrentUser = (state: RootState) => state.auth.user;
-export const selectCartCount = (state: RootState) => state.auth.cartItemCount;
 
 export default authSlice.reducer;

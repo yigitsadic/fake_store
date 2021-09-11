@@ -1,7 +1,8 @@
 import React from "react";
 import {useAppDispatch, useAppSelector} from "../../store/hooks";
-import {selectedCurrentUser, updateCartCount} from "../../store/auth/auth";
+import {selectedCurrentUser} from "../../store/auth/auth";
 import {useAddItemToCartMutation} from "../../generated/graphql";
+import {CART_ITEM_COUNT_QUERY} from "../nav-bar/cart-link/cart-item-count-query";
 
 interface ProductDetailProps {
     product: {
@@ -20,14 +21,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
     const [addToCartFn, {loading, error}] = useAddItemToCartMutation();
 
     const handleAddToCart = () => {
-        addToCartFn({variables: {productId: product.id}})
-            .then(result => {
-                const itemsCount = result.data?.addToCart.itemsCount;
-
-                if (itemsCount) {
-                    dispatch(updateCartCount(itemsCount));
-                }
-            });
+        addToCartFn({
+            variables: {productId: product.id},
+            refetchQueries: [{query: CART_ITEM_COUNT_QUERY}],
+        });
     }
 
     return <div className="col">
@@ -48,9 +45,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
 
                     <button type="button"
                             className="btn btn-sm btn-outline-success"
-                            disabled={!currentUser.loggedIn}
-                            onClick={() => handleAddToCart()}
-                    >
+                            disabled={loading || !currentUser.loggedIn}
+                            onClick={() => handleAddToCart()}>
                         {error ? "Try again..." : (loading ? "Working..." : "Add to Cart")}
                     </button>
                 </div>

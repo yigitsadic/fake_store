@@ -1,7 +1,7 @@
 import React from "react";
 
 import  { Link } from "react-router-dom";
-import CartLink from "./CartLink";
+import CartLink from "./cart-link/CartLink";
 
 const Links: React.FC = () => {
     return (
