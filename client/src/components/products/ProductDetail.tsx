@@ -1,6 +1,7 @@
 import React from "react";
-import {useAppSelector} from "../../store/hooks";
-import {selectedCurrentUser} from "../../store/auth/auth";
+import {useAppDispatch, useAppSelector} from "../../store/hooks";
+import {selectedCurrentUser, updateCartCount} from "../../store/auth/auth";
+import {useAddItemToCartMutation} from "../../generated/graphql";
 
 interface ProductDetailProps {
     product: {
@@ -13,7 +14,21 @@ interface ProductDetailProps {
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailProps) => {
+    const dispatch = useAppDispatch();
     const currentUser = useAppSelector(selectedCurrentUser);
+
+    const [addToCartFn, {loading, error}] = useAddItemToCartMutation();
+
+    const handleAddToCart = () => {
+        addToCartFn({variables: {productId: product.id}})
+            .then(result => {
+                const itemsCount = result.data?.addToCart.itemsCount;
+
+                if (itemsCount) {
+                    dispatch(updateCartCount(itemsCount));
+                }
+            });
+    }
 
     return <div className="col">
         <div className="card shadow-sm">
@@ -25,6 +40,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                 <p className="card-text">
                     {product.description}
                 </p>
+
                 <div className="d-flex justify-content-between align-items-center">
                     <b className="text-muted">
                         {product.price.toFixed(2)} EUR
@@ -32,8 +48,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
 
                     <button type="button"
                             className="btn btn-sm btn-outline-success"
-                            disabled={!currentUser.loggedIn}>
-                        Add to Cart
+                            disabled={!currentUser.loggedIn}
+                            onClick={() => handleAddToCart()}
+                    >
+                        {error ? "Try again..." : (loading ? "Working..." : "Add to Cart")}
                     </button>
                 </div>
             </div>

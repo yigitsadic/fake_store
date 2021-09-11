@@ -41,10 +41,16 @@ export type Mutation = {
   __typename?: 'Mutation';
   addToCart: Cart;
   login: LoginResponse;
+  removeFromCart: Cart;
 };
 
 
 export type MutationAddToCartArgs = {
+  productId: Scalars['ID'];
+};
+
+
+export type MutationRemoveFromCartArgs = {
   productId: Scalars['ID'];
 };
 
@@ -73,6 +79,13 @@ export type LoginMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResponse', id: string, avatar: string, fullName: string, token: string } };
+
+export type AddItemToCartMutationVariables = Exact<{
+  productId: Scalars['ID'];
+}>;
+
+
+export type AddItemToCartMutation = { __typename?: 'Mutation', addToCart: { __typename?: 'Cart', itemsCount: number } };
 
 export type ListProductsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -155,6 +168,39 @@ export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginM
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
 export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
 export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export const AddItemToCartDocument = gql`
+    mutation addItemToCart($productId: ID!) {
+  addToCart(productId: $productId) {
+    itemsCount
+  }
+}
+    `;
+export type AddItemToCartMutationFn = Apollo.MutationFunction<AddItemToCartMutation, AddItemToCartMutationVariables>;
+
+/**
+ * __useAddItemToCartMutation__
+ *
+ * To run a mutation, you first call `useAddItemToCartMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddItemToCartMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addItemToCartMutation, { data, loading, error }] = useAddItemToCartMutation({
+ *   variables: {
+ *      productId: // value for 'productId'
+ *   },
+ * });
+ */
+export function useAddItemToCartMutation(baseOptions?: Apollo.MutationHookOptions<AddItemToCartMutation, AddItemToCartMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddItemToCartMutation, AddItemToCartMutationVariables>(AddItemToCartDocument, options);
+      }
+export type AddItemToCartMutationHookResult = ReturnType<typeof useAddItemToCartMutation>;
+export type AddItemToCartMutationResult = Apollo.MutationResult<AddItemToCartMutation>;
+export type AddItemToCartMutationOptions = Apollo.BaseMutationOptions<AddItemToCartMutation, AddItemToCartMutationVariables>;
 export const ListProductsDocument = gql`
     query listProducts {
   products {
