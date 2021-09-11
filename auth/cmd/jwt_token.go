@@ -18,7 +18,6 @@ func GenerateJWTToken(id, avatar, fullName string) string {
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().AddDate(1, 0, 0).UnixNano(),
 			Id:        id,
-			IssuedAt:  time.Now().UnixNano(),
 		},
 	}
 
