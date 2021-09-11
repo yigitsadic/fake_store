@@ -2,15 +2,14 @@ import React from "react";
 import {useAppSelector} from "../../store/hooks";
 import {selectedCurrentUser} from "../../store/auth/auth";
 
-interface ProductProps {
-    id: string,
-    title: string,
-    description: string,
-    price: number,
-    image: string
-}
 interface ProductDetailProps {
-    product: ProductProps;
+    product: {
+        id: string,
+        title: string,
+        description: string,
+        price: number,
+        image: string
+    };
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailProps) => {
