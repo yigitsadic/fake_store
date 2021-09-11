@@ -38,21 +38,21 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 			Title:       "Camera",
 			Description: "Basic camera",
 			Price:       499.50,
-			Image:       "camera.png",
+			Image:       "https://via.placeholder.com/150",
 		},
 		{
 			ID:          "24e",
 			Title:       "Game console",
 			Description: "Game console. Video games.",
 			Price:       300.75,
-			Image:       "game-console.png",
+			Image:       "https://via.placeholder.com/150",
 		},
 		{
 			ID:          "43ert5",
 			Title:       "Classical Novel",
 			Description: "Classical novel that we all like",
 			Price:       27,
-			Image:       "book-cover-1.png",
+			Image:       "https://via.placeholder.com/150",
 		},
 	}
 
