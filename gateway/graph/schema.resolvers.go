@@ -27,6 +27,38 @@ func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, err
 	return &res, nil
 }
 
+func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*model.Cart, error) {
+	items := []*model.CartItem{
+		{
+			ID:          "abcdef",
+			Title:       "Test Product",
+			Description: "Lorem",
+			Price:       17.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+		{
+			ID:          "xyzdef",
+			Title:       "Test Product II",
+			Description: "Lorem",
+			Price:       30.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+		{
+			ID:          productID,
+			Title:       "Test Product III",
+			Description: "Lorem",
+			Price:       50.99,
+			Image:       "https://via.placeholder.com/150",
+		},
+	}
+	c := model.Cart{
+		Items:      items,
+		ItemsCount: 3,
+	}
+
+	return &c, nil
+}
+
 func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
 	return "Hello World", nil
 }
@@ -50,6 +82,31 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 	}
 
 	return products, nil
+}
+
+func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
+	items := []*model.CartItem{
+		{
+			ID:          "abcdef",
+			Title:       "Test Product",
+			Description: "Lorem",
+			Price:       17.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+		{
+			ID:          "xyzdef",
+			Title:       "Test Product II",
+			Description: "Lorem",
+			Price:       30.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+	}
+	c := model.Cart{
+		Items:      items,
+		ItemsCount: 2,
+	}
+
+	return &c, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

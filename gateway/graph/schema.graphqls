@@ -1,6 +1,7 @@
 type Query {
   sayHello: String!
   products: [Product!]
+  cart: Cart!
 }
 
 type LoginResponse {
@@ -18,6 +19,21 @@ type Product {
   image: String!
 }
 
+type CartItem {
+  id: ID!
+  title: String!
+  description: String!
+  price: Float!
+  image: String!
+}
+
+type Cart {
+  items: [CartItem!]
+  itemsCount: Int!
+}
+
 type Mutation {
   login: LoginResponse!
+
+  addToCart(productId: ID!): Cart!
 }
