@@ -8,7 +8,9 @@ import (
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
+	"github.com/yigitsadic/fake_store/gateway/helper"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
+	"log"
 )
 
 func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, error) {
@@ -28,6 +30,13 @@ func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, err
 }
 
 func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*model.Cart, error) {
+	userId, err := helper.Authenticated(ctx.Value("userId"))
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Current user: ", userId)
+
 	items := []*model.CartItem{
 		{
 			ID:          "abcdef",
@@ -60,6 +69,13 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 }
 
 func (r *mutationResolver) RemoveFromCart(ctx context.Context, productID string) (*model.Cart, error) {
+	userId, err := helper.Authenticated(ctx.Value("userId"))
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Current user: ", userId)
+
 	items := []*model.CartItem{
 		{
 			ID:          "abcdef",
@@ -110,10 +126,41 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-	return &model.Cart{
-		Items:      nil,
-		ItemsCount: 0,
-	}, nil
+	userId, err := helper.Authenticated(ctx.Value("userId"))
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("Current user: ", userId)
+	items := []*model.CartItem{
+		{
+			ID:          "abcdef",
+			Title:       "Test Product",
+			Description: "Lorem",
+			Price:       17.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+		{
+			ID:          "xyzdef",
+			Title:       "Test Product II",
+			Description: "Lorem",
+			Price:       30.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+		{
+			ID:          "asdas",
+			Title:       "Test Product III",
+			Description: "Lorem",
+			Price:       50.99,
+			Image:       "https://via.placeholder.com/150",
+		},
+	}
+	c := model.Cart{
+		Items:      items,
+		ItemsCount: 3,
+	}
+
+	return &c, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
