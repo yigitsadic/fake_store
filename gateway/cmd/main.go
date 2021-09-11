@@ -37,11 +37,11 @@ func main() {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver}))
 
 	r := chi.NewRouter()
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		Debug:            true,
-	}).Handler)
+
+	r.Use(cors.AllowAll().Handler)
+
+	// Parses JWT token in the Authorization key in header and stores it to context with key *userId*
+	r.Use(AuthMiddleware)
 
 	r.Use(middleware.Heartbeat("/readiness"))
 
