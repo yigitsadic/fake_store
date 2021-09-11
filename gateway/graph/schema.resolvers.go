@@ -5,10 +5,10 @@ package graph
 
 import (
 	"context"
-
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
+	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 )
 
 func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, error) {
@@ -32,28 +32,21 @@ func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
 }
 
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
-	products := []*model.Product{
-		{
-			ID:          "12e",
-			Title:       "Camera",
-			Description: "Basic camera",
-			Price:       499.50,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "24e",
-			Title:       "Game console",
-			Description: "Game console. Video games.",
-			Price:       300.75,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "43ert5",
-			Title:       "Classical Novel",
-			Description: "Classical novel that we all like",
-			Price:       27,
-			Image:       "https://via.placeholder.com/150",
-		},
+	var products []*model.Product
+
+	productResp, err := r.ProductsClient.ListProducts(ctx, &product_grpc.ProductListRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, product := range productResp.Products {
+		products = append(products, &model.Product{
+			ID:          product.Id,
+			Title:       product.Title,
+			Description: product.Description,
+			Price:       float64(product.Price),
+			Image:       product.Image,
+		})
 	}
 
 	return products, nil

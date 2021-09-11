@@ -6,6 +6,7 @@ COPY go.mod go.sum ./
 
 COPY gateway gateway
 COPY auth auth
+COPY products products
 
 RUN go build -o gateway_service ./gateway/cmd/
 

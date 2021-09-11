@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/client/client"
+	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
 	"log"
 	"net/http"
@@ -25,8 +26,12 @@ func main() {
 	authConnection, authClient := acquireAuthConnection()
 	defer authConnection.Close()
 
+	productsConnection, productClient := acquireProductsConnection()
+	defer productsConnection.Close()
+
 	resolver := graph.Resolver{
-		AuthClient: authClient,
+		AuthClient:     authClient,
+		ProductsClient: productClient,
 	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver}))
@@ -54,6 +59,17 @@ func acquireAuthConnection() (*grpc.ClientConn, client.AuthServiceClient) {
 	}
 
 	c := client.NewAuthServiceClient(conn)
+
+	return conn, c
+}
+
+func acquireProductsConnection() (*grpc.ClientConn, product_grpc.ProductServiceClient) {
+	conn, err := grpc.Dial("products:9000", grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalln("Unable to acquire products connection")
+	}
+
+	c := product_grpc.NewProductServiceClient(conn)
 
 	return conn, c
 }
