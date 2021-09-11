@@ -1,0 +1,51 @@
+name: Build client image and push docker hub
+on:
+  push:
+    tags:
+      - build_all_v_*
+
+jobs:
+  build_and_push_products:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_products -f products/Dockerfile .
+          docker push yigitsadic/fake_store_products:latest
+  build_and_push_gateway:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_gateway -f gateway/Dockerfile .
+          docker push yigitsadic/fake_store_gateway:latest
+  build_and_push_client:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_client -f client/Dockerfile .
+          docker push yigitsadic/fake_store_client:latest
+  build_and_push_auth:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_auth -f auth/Dockerfile .
+          docker push yigitsadic/fake_store_auth:latest

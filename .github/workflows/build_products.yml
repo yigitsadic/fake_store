@@ -1,0 +1,20 @@
+name: Build products image and push docker hub
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'products/**'
+
+jobs:
+  build_and_push_image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_products -f products/Dockerfile .
+          docker push yigitsadic/fake_store_products:latest
