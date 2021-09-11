@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
@@ -40,5 +41,8 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: path.join(__dirname, "src", "index.html"),
         }),
+        new webpack.DefinePlugin({
+            "process.env.API_URL": process.env.API_URL || JSON.stringify("http://localhost:3035/query")
+        })
     ],
 };
