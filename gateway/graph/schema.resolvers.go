@@ -13,6 +13,8 @@ import (
 	"log"
 )
 
+var CartItems []*model.CartItem
+
 func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, error) {
 	result, err := r.AuthClient.LoginUser(ctx, &client.AuthRequest{})
 	if err != nil {
@@ -37,32 +39,17 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 
 	log.Println("Current user: ", userId)
 
-	items := []*model.CartItem{
-		{
-			ID:          "abcdef",
-			Title:       "Test Product",
-			Description: "Lorem",
-			Price:       17.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "xyzdef",
-			Title:       "Test Product II",
-			Description: "Lorem",
-			Price:       30.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          productID,
-			Title:       "Test Product III",
-			Description: "Lorem",
-			Price:       50.99,
-			Image:       "https://via.placeholder.com/150",
-		},
-	}
+	a := append(CartItems, &model.CartItem{
+		ID:          "abcdef",
+		Title:       "Test Product",
+		Description: "Lorem",
+		Price:       17.5,
+		Image:       "https://via.placeholder.com/150",
+	})
+
 	c := model.Cart{
-		Items:      items,
-		ItemsCount: 3,
+		Items:      a,
+		ItemsCount: len(a),
 	}
 
 	return &c, nil
@@ -132,32 +119,9 @@ func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
 	}
 
 	log.Println("Current user: ", userId)
-	items := []*model.CartItem{
-		{
-			ID:          "abcdef",
-			Title:       "Test Product",
-			Description: "Lorem",
-			Price:       17.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "xyzdef",
-			Title:       "Test Product II",
-			Description: "Lorem",
-			Price:       30.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "asdas",
-			Title:       "Test Product III",
-			Description: "Lorem",
-			Price:       50.99,
-			Image:       "https://via.placeholder.com/150",
-		},
-	}
 	c := model.Cart{
-		Items:      items,
-		ItemsCount: 3,
+		Items:      CartItems,
+		ItemsCount: len(CartItems),
 	}
 
 	return &c, nil

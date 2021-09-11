@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
@@ -10,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -23,11 +25,29 @@ func main() {
 		port = "3035"
 	}
 
-	authConnection, authClient := acquireAuthConnection()
-	defer authConnection.Close()
+	var authClient client.AuthServiceClient
+	var productClient product_grpc.ProductServiceClient
 
-	productsConnection, productClient := acquireProductsConnection()
-	defer productsConnection.Close()
+	authConnection, err := acquireAuthConnection()
+	if err != nil {
+		authConnection = nil
+
+		log.Println("Cannot obtain auth service connection")
+	} else {
+		authClient = client.NewAuthServiceClient(authConnection)
+		defer authConnection.Close()
+	}
+
+	productsConnection, err := acquireProductsConnection()
+	if err != nil {
+		productClient = nil
+
+		log.Println("Cannot obtain product service connection")
+	} else {
+		productClient = product_grpc.NewProductServiceClient(productsConnection)
+
+		defer productsConnection.Close()
+	}
 
 	resolver := graph.Resolver{
 		AuthClient:     authClient,
@@ -52,24 +72,27 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
-func acquireAuthConnection() (*grpc.ClientConn, client.AuthServiceClient) {
-	conn, err := grpc.Dial("auth:9000", grpc.WithInsecure(), grpc.WithBlock())
+func acquireAuthConnection() (*grpc.ClientConn, error) {
+	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(dialCtx, "auth:9000", grpc.WithInsecure(), grpc.WithBlock())
+
 	if err != nil {
-		log.Fatalln("Unable to acquire auth connection")
+		return nil, err
 	}
 
-	c := client.NewAuthServiceClient(conn)
-
-	return conn, c
+	return conn, nil
 }
 
-func acquireProductsConnection() (*grpc.ClientConn, product_grpc.ProductServiceClient) {
-	conn, err := grpc.Dial("products:9000", grpc.WithInsecure(), grpc.WithBlock())
+func acquireProductsConnection() (*grpc.ClientConn, error) {
+	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(dialCtx, "products:9000", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalln("Unable to acquire products connection")
+		return nil, err
 	}
 
-	c := product_grpc.NewProductServiceClient(conn)
-
-	return conn, c
+	return conn, nil
 }
