@@ -8,3 +8,11 @@ type LoginResponse struct {
 	FullName string `json:"fullName"`
 	Token    string `json:"token"`
 }
+
+type Product struct {
+	ID          string  `json:"id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Image       string  `json:"image"`
+}

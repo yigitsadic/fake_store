@@ -1,5 +1,6 @@
 type Query {
   sayHello: String!
+  products: [Product]
 }
 
 type LoginResponse {
@@ -7,6 +8,14 @@ type LoginResponse {
   avatar: String!
   fullName: String!
   token: String!
+}
+
+type Product {
+  id: ID!
+  title: String!
+  description: String!
+  price: Float!
+  image: String!
 }
 
 type Mutation {

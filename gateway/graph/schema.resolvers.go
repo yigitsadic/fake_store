@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"github.com/yigitsadic/fake_store/auth/client/client"
-
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
 )
@@ -29,6 +28,34 @@ func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, err
 
 func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
 	return "Hello World", nil
+}
+
+func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
+	products := []*model.Product{
+		{
+			ID:          "12e",
+			Title:       "Camera",
+			Description: "Basic camera",
+			Price:       499.50,
+			Image:       "camera.png",
+		},
+		{
+			ID:          "24e",
+			Title:       "Game console",
+			Description: "Game console. Video games.",
+			Price:       300.75,
+			Image:       "game-console.png",
+		},
+		{
+			ID:          "43ert5",
+			Title:       "Classical Novel",
+			Description: "Classical novel that we all like",
+			Price:       27,
+			Image:       "book-cover-1.png",
+		},
+	}
+
+	return products, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
