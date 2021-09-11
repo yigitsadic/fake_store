@@ -4,8 +4,6 @@ WORKDIR /app/src
 
 COPY client .
 
-RUN cd client
-
 RUN yarn install --production=false
 
 ENV NODE_ENV=production
