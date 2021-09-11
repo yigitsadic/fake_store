@@ -2,6 +2,8 @@ import React from "react";
 import NavBar from "./components/nav-bar/NavBar";
 import {Route, Switch} from "react-router-dom";
 import ProductsList from "./components/products/ProductsList";
+import CartDetail from "./components/cart/CartDetail";
+import OrderList from "./components/orders/OrderList";
 
 const App: React.FC = () => {
     return (
@@ -15,11 +17,11 @@ const App: React.FC = () => {
                     </Route>
 
                     <Route path="/orders">
-                        Orders
+                        <OrderList />
                     </Route>
 
                     <Route path="/cart">
-                        Cart
+                        <CartDetail />
                     </Route>
 
                     <Route path="/">
