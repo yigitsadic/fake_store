@@ -1,6 +1,6 @@
 type Query {
   sayHello: String!
-  products: [Product]
+  products: [Product!]
 }
 
 type LoginResponse {

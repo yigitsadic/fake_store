@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
