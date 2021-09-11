@@ -36,4 +36,5 @@ type Mutation {
   login: LoginResponse!
 
   addToCart(productId: ID!): Cart!
+  removeFromCart(productId: ID!): Cart!
 }

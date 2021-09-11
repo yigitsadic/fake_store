@@ -59,6 +59,31 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 	return &c, nil
 }
 
+func (r *mutationResolver) RemoveFromCart(ctx context.Context, productID string) (*model.Cart, error) {
+	items := []*model.CartItem{
+		{
+			ID:          "abcdef",
+			Title:       "Test Product",
+			Description: "Lorem",
+			Price:       17.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+		{
+			ID:          "xyzdef",
+			Title:       "Test Product II",
+			Description: "Lorem",
+			Price:       30.5,
+			Image:       "https://via.placeholder.com/150",
+		},
+	}
+	c := model.Cart{
+		Items:      items,
+		ItemsCount: 2,
+	}
+
+	return &c, nil
+}
+
 func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
 	return "Hello World", nil
 }
@@ -85,28 +110,10 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-	items := []*model.CartItem{
-		{
-			ID:          "abcdef",
-			Title:       "Test Product",
-			Description: "Lorem",
-			Price:       17.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "xyzdef",
-			Title:       "Test Product II",
-			Description: "Lorem",
-			Price:       30.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-	}
-	c := model.Cart{
-		Items:      items,
-		ItemsCount: 2,
-	}
-
-	return &c, nil
+	return &model.Cart{
+		Items:      nil,
+		ItemsCount: 0,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
