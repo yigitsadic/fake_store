@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  gateway:
+    image: yigitsadic/fake_store_gateway
+    restart: always
+    ports:
+      - "3035:3035"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3035/readiness" ]
+      interval: 200s
+      timeout: 200s
+      retries: 5
+  auth:
+    restart: always
+    image: yigitsadic/fake_store_auth
+  products:
+    restart: always
+    image: yigitsadic/fake_store_products
+  client:
+    restart: always
+    image: yigitsadic/fake_store_client
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
