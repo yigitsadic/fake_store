@@ -20,6 +20,7 @@ export const authSlice = createSlice({
             state.user = action.payload;
         },
         logout: (state) => {
+            localStorage.removeItem("fake_store_token");
             state.user = { loggedIn: false };
         },
     },

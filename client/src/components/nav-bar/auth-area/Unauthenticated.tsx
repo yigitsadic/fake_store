@@ -14,6 +14,8 @@ const Unauthenticated: React.FC = () => {
             avatar: data.login.avatar,
             loggedIn: true,
         }));
+
+        localStorage.setItem("fake_store_token", data.login.token);
     }
 
     return <>
