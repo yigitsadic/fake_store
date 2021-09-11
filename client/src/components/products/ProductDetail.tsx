@@ -26,17 +26,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                     {product.description}
                 </p>
                 <div className="d-flex justify-content-between align-items-center">
-                    <div className="btn-group">
-                        <button type="button"
-                                className="btn btn-sm btn-outline-success"
-                                disabled={!currentUser.loggedIn}>
-                            Add to Cart
-                        </button>
-                    </div>
-
-                    <small className="text-muted">
+                    <b className="text-muted">
                         {product.price.toFixed(2)} EUR
-                    </small>
+                    </b>
+
+                    <button type="button"
+                            className="btn btn-sm btn-outline-success"
+                            disabled={!currentUser.loggedIn}>
+                        Add to Cart
+                    </button>
                 </div>
             </div>
         </div>

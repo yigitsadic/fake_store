@@ -4,7 +4,7 @@ import jwt_decode from "jwt-decode";
 
 import NavBar from "./components/nav-bar/NavBar";
 import ProductsList from "./components/products/ProductsList";
-import CartDetail from "./components/cart/CartDetail";
+import CartDetailContainer from "./components/cart/CartDetailContainer";
 import OrderList from "./components/orders/OrderList";
 import {TokenPayload} from "./store/auth/token-payload";
 import {useAppDispatch} from "./store/hooks";
@@ -43,7 +43,7 @@ const App: React.FC = () => {
                     </Route>
 
                     <Route path="/cart">
-                        <CartDetail />
+                        <CartDetailContainer />
                     </Route>
 
                     <Route path="/">
