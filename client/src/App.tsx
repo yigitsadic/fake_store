@@ -23,7 +23,7 @@ const App: React.FC = () => {
                     </Route>
 
                     <Route path="/">
-                        Home
+                        <ProductsList />
                     </Route>
                 </Switch>
             </div>
