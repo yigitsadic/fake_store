@@ -91,10 +91,12 @@ func (s *server) RemoveFromCart(ctx context.Context, req *cart_grpc.RemoveFromCa
 		var filteredItems []CartItem
 
 		for _, item := range items {
-			if !(item.ID == req.GetCartItemId()) {
+			if item.ID != req.GetCartItemId() {
 				filteredItems = append(filteredItems, item)
 			}
 		}
+
+		CartStorage[req.GetUserId()] = filteredItems
 
 		res := formatCartItemsToGrpcCompatible(items)
 
