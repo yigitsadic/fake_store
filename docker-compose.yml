@@ -20,6 +20,10 @@ services:
     build:
       context: .
       dockerfile: ./products/Dockerfile
+  cart:
+    build:
+      context: .
+      dockerfile: ./cart/Dockerfile
   client:
     build:
       context: .
