@@ -3,27 +3,48 @@ version: "3.3"
 services:
   gateway:
     image: yigitsadic/fake_store_gateway
+    labels:
+      - "traefik.http.routers.gateway.rule=Host(`api.store.yapas.in`)"
+      - "traefik.http.routers.gateway.entrypoints=web"
+      - "traefik.enable=true"
     ports:
       - "3035:3035"
-    networks:
-      - adorant
   auth:
     image: yigitsadic/fake_store_auth
-    networks:
-      - adorant
+    deploy:
+      mode: replicated
+      replicas: 1
   products:
     image: yigitsadic/fake_store_products
-    networks:
-      - adorant
+    deploy:
+      mode: replicated
+      replicas: 1
   client:
     image: yigitsadic/fake_store_client
-    ports:
-      - "80:80"
+    labels:
+      - "traefik.http.routers.client.rule=Host(`store.yapas.in`)"
+      - "traefik.http.routers.client.entrypoints=web"
+      - "traefik.enable=true"
   visualizer:
     image: dockersamples/visualizer:stable
-    ports:
-      - "5000:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-networks:
-  adorant:
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    labels:
+      - "traefik.http.routers.visualizer.rule=Host(`visual.store.yapas.in`)"
+      - "traefik.http.routers.visualizer.entrypoints=web"
+      - "traefik.enable=true"
+  reverse-proxy:
+    image: traefik:v2.5
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
