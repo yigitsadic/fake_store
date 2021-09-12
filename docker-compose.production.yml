@@ -3,24 +3,27 @@ version: "3.3"
 services:
   gateway:
     image: yigitsadic/fake_store_gateway
-    restart: always
     ports:
       - "3035:3035"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3035/readiness" ]
-      interval: 200s
-      timeout: 200s
-      retries: 5
+    networks:
+      - adorant
   auth:
-    restart: always
     image: yigitsadic/fake_store_auth
+    networks:
+      - adorant
   products:
-    restart: always
     image: yigitsadic/fake_store_products
+    networks:
+      - adorant
   client:
-    restart: always
     image: yigitsadic/fake_store_client
     ports:
-      - "3000:80"
-    depends_on:
-      - gateway
+      - "80:80"
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "5000:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+networks:
+  adorant:
