@@ -17,6 +17,11 @@ message ProductList {
   repeated Product products = 1;
 }
 
+message ProductDetailRequest {
+  string productId = 1;
+}
+
 service ProductService {
   rpc ListProducts(ProductListRequest) returns (ProductList) {}
+  rpc ProductDetail(ProductDetailRequest) returns (Product) {}
 }
