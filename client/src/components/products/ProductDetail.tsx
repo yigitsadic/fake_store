@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {useAppSelector} from "../../store/hooks";
 import {selectedCurrentUser} from "../../store/auth/auth";
 import {useAddItemToCartMutation} from "../../generated/graphql";
@@ -14,13 +14,19 @@ interface ProductDetailProps {
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailProps) => {
+    const initialText = "Add to Cart";
+    const [buttonText, setButtonText] = useState(initialText);
     const currentUser = useAppSelector(selectedCurrentUser);
 
-    const [addToCartFn, {loading, error}] = useAddItemToCartMutation();
+    const [addToCartFn, {loading}] = useAddItemToCartMutation();
 
     const handleAddToCart = () => {
         addToCartFn({
             variables: {productId: product.id},
+        }).then(() => {
+            setButtonText("👍 Added...");
+        }).catch(() => {
+            setButtonText("Try again...");
         });
     }
 
@@ -44,7 +50,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                             className="btn btn-sm btn-outline-success"
                             disabled={loading || !currentUser.loggedIn}
                             onClick={() => handleAddToCart()}>
-                        {error ? "Try again..." : (loading ? "Working..." : "Add to Cart")}
+                        {buttonText}
                     </button>
                 </div>
             </div>
