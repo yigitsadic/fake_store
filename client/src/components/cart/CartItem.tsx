@@ -1,7 +1,6 @@
 import React from "react";
 import {useRemoveFromCartMutation} from "../../generated/graphql";
 import {CART_CONTENT_QUERY} from "./cart-content-query";
-import {CART_ITEM_COUNT_QUERY} from "../nav-bar/cart-link/cart-item-count-query";
 
 interface CartItemProps {
     item: {
@@ -21,7 +20,9 @@ const CartItem:React.FC<CartItemProps> = ({ item }: CartItemProps) => {
             variables: {
                 cartItemId: item.id,
             },
-            refetchQueries: [{ query: CART_CONTENT_QUERY }, {query: CART_ITEM_COUNT_QUERY}],
+            refetchQueries: [{ query: CART_CONTENT_QUERY }],
+        }).then(item => {
+            console.log(item.data?.removeFromCart.itemsCount);
         });
     }
 

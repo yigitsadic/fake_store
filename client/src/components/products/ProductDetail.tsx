@@ -1,8 +1,7 @@
 import React from "react";
-import {useAppDispatch, useAppSelector} from "../../store/hooks";
+import {useAppSelector} from "../../store/hooks";
 import {selectedCurrentUser} from "../../store/auth/auth";
 import {useAddItemToCartMutation} from "../../generated/graphql";
-import {CART_ITEM_COUNT_QUERY} from "../nav-bar/cart-link/cart-item-count-query";
 
 interface ProductDetailProps {
     product: {
@@ -15,7 +14,6 @@ interface ProductDetailProps {
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailProps) => {
-    const dispatch = useAppDispatch();
     const currentUser = useAppSelector(selectedCurrentUser);
 
     const [addToCartFn, {loading, error}] = useAddItemToCartMutation();
@@ -23,7 +21,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
     const handleAddToCart = () => {
         addToCartFn({
             variables: {productId: product.id},
-            refetchQueries: [{query: CART_ITEM_COUNT_QUERY}],
         });
     }
 

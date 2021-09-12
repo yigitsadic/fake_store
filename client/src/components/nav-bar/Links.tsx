@@ -1,7 +1,6 @@
 import React from "react";
 
 import  { Link } from "react-router-dom";
-import CartLink from "./cart-link/CartLink";
 
 const Links: React.FC = () => {
     return (
@@ -20,7 +19,7 @@ const Links: React.FC = () => {
 
             <li className="nav-item">
                 <Link to="/cart" className="nav-link">
-                    <CartLink />
+                    <button type="button" className="btn btn-sm btn-outline-info position-relative">Cart</button>
                 </Link>
             </li>
         </ul>
