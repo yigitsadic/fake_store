@@ -15,7 +15,7 @@ Open `http://localhost:3000` on browser.
 
 ## Demo
 
-[http://161.35.75.56](http://161.35.75.56)
+[http://store.yapas.in](http://store.yapas.in)
 
 ## About
 
