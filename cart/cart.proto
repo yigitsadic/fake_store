@@ -1,0 +1,32 @@
+syntax = "proto3";
+package cart;
+
+option go_package = "cart_grpc/cart_grpc";
+
+message CartOperationRequest {
+  string userId = 1;
+  string productId = 2;
+}
+
+message CartItem {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  float price = 4;
+  string image = 5;
+}
+
+message CartContentRequest {
+  string userId = 1;
+}
+
+message CartContent {
+  int32 itemCount = 1;
+  repeated CartItem cartItems = 2;
+}
+
+service ProductService {
+  rpc CartContent(CartContentRequest) returns (CartContent) {}
+  rpc AddToCart(CartOperationRequest) returns (CartContent) {}
+  rpc RemoveFromCart(CartOperationRequest) returns (CartContent) {}
+}
