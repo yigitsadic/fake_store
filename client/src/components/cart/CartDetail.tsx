@@ -5,7 +5,7 @@ import CartItem from "./CartItem";
 import EmptyCart from "./EmptyCart";
 
 const CartDetail: React.FC = () => {
-    const { data, loading, error } = useCartContentQuery({ fetchPolicy: "no-cache" });
+    const { data, loading, error } = useCartContentQuery({ fetchPolicy: "network-only" });
 
     if (loading) return <h3>Loading...</h3>;
     if (error) return <h3>Error occurred during fetching current cart</h3>;
