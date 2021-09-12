@@ -7,6 +7,7 @@ COPY client .
 RUN yarn install --production=false
 
 ENV NODE_ENV=production
+ENV API_URL=$API_URL
 RUN yarn run build
 
 FROM nginx:alpine
