@@ -14,3 +14,4 @@ WORKDIR /src
 
 COPY --from=compiler /src/app/cart_service /src/app
 CMD ["/src/app"]
+

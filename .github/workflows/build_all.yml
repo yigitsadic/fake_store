@@ -49,3 +49,14 @@ jobs:
           docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
           docker build -t yigitsadic/fake_store_auth -f auth/Dockerfile .
           docker push yigitsadic/fake_store_auth:latest
+  build_and_push_cart:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_cart -f cart/Dockerfile .
+          docker push yigitsadic/fake_store_cart:latest
