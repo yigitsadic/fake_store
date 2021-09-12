@@ -15,7 +15,7 @@ Open `http://localhost:3000` on browser.
 
 ## Demo
 
-[http://134.122.70.47](http://134.122.70.47)
+[http://161.35.75.56](http://161.35.75.56)
 
 ## About
 
