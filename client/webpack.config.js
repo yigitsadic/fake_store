@@ -42,7 +42,7 @@ module.exports = {
             template: path.join(__dirname, "src", "index.html"),
         }),
         new webpack.DefinePlugin({
-            "process.env.API_URL": process.env.API_URL || JSON.stringify("http://localhost:3035/query")
+            "process.env.API_URL": JSON.stringify(process.env.API_URL) || JSON.stringify("http://localhost:3035/query")
         })
     ],
 };
