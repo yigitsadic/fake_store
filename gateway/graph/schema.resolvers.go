@@ -5,16 +5,15 @@ package graph
 
 import (
 	"context"
-	"github.com/bxcodec/faker/v3"
+	"errors"
+
 	"github.com/yigitsadic/fake_store/auth/client/client"
+	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
 	"github.com/yigitsadic/fake_store/gateway/helper"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
-	"log"
 )
-
-var CartItems []*model.CartItem
 
 func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, error) {
 	result, err := r.AuthClient.LoginUser(ctx, &client.AuthRequest{})
@@ -38,40 +37,47 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 		return nil, err
 	}
 
-	log.Println("Current user: ", userId)
-
-	CartItems = append(CartItems, &model.CartItem{
-		ID:          faker.UUIDDigit(),
-		Title:       "Test Product",
-		Description: "Lorem",
-		Price:       17.5,
-		Image:       "https://via.placeholder.com/150",
-	})
-
-	c := model.Cart{
-		Items:      CartItems,
-		ItemsCount: len(CartItems),
+	product, err := r.ProductsClient.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: productID})
+	if err != nil {
+		return nil, errors.New("product not found")
 	}
 
-	return &c, nil
+	res, err := r.CartService.AddToCart(ctx, &cart_grpc.AddToCartRequest{
+		UserId:      userId,
+		ProductId:   product.Id,
+		Title:       product.Title,
+		Description: product.Description,
+		Price:       product.Price,
+		Image:       product.Image,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Cart{
+		Items:      ConvertCartFromService(res.GetCartItems()),
+		ItemsCount: int(res.GetItemCount()),
+	}, nil
 }
 
-func (r *mutationResolver) RemoveFromCart(ctx context.Context, productID string) (*model.Cart, error) {
+func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string) (*model.Cart, error) {
 	userId, err := helper.Authenticated(ctx.Value("userId"))
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Current user: ", userId)
-
-	CartItems = append([]*model.CartItem{}, CartItems[1:]...)
-
-	c := model.Cart{
-		Items:      CartItems,
-		ItemsCount: len(CartItems),
+	res, err := r.CartService.RemoveFromCart(ctx, &cart_grpc.RemoveFromCartRequest{
+		UserId:     userId,
+		CartItemId: cartItemID,
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	return &c, nil
+	return &model.Cart{
+		Items:      ConvertCartFromService(res.GetCartItems()),
+		ItemsCount: int(res.GetItemCount()),
+	}, nil
 }
 
 func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
@@ -105,13 +111,15 @@ func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
 		return nil, err
 	}
 
-	log.Println("Current user: ", userId)
-	c := model.Cart{
-		Items:      CartItems,
-		ItemsCount: len(CartItems),
+	res, err := r.CartService.CartContent(ctx, &cart_grpc.CartContentRequest{UserId: userId})
+	if err != nil {
+		return nil, err
 	}
 
-	return &c, nil
+	return &model.Cart{
+		Items:      ConvertCartFromService(res.GetCartItems()),
+		ItemsCount: int(res.GetItemCount()),
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

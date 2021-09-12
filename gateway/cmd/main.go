@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/client/client"
+	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
 	"log"
@@ -27,6 +28,7 @@ func main() {
 
 	var authClient client.AuthServiceClient
 	var productClient product_grpc.ProductServiceClient
+	var cartClient cart_grpc.CartServiceClient
 
 	authConnection, err := acquireAuthConnection()
 	if err != nil {
@@ -49,9 +51,21 @@ func main() {
 		defer productsConnection.Close()
 	}
 
+	cartConnection, err := acquireCartConnection()
+	if err != nil {
+		cartClient = nil
+
+		log.Println("Cannot obtain product service connection")
+	} else {
+		cartClient = cart_grpc.NewCartServiceClient(cartConnection)
+
+		defer cartConnection.Close()
+	}
+
 	resolver := graph.Resolver{
 		AuthClient:     authClient,
 		ProductsClient: productClient,
+		CartService:    cartClient,
 	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver}))
@@ -90,6 +104,18 @@ func acquireProductsConnection() (*grpc.ClientConn, error) {
 	defer cancel()
 
 	conn, err := grpc.DialContext(dialCtx, "products:9000", grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
+}
+
+func acquireCartConnection() (*grpc.ClientConn, error) {
+	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+
+	conn, err := grpc.DialContext(dialCtx, "cart:9000", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}

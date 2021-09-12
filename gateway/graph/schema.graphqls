@@ -21,6 +21,7 @@ type Product {
 
 type CartItem {
   id: ID!
+  productId: ID!
   title: String!
   description: String!
   price: Float!
@@ -36,5 +37,5 @@ type Mutation {
   login: LoginResponse!
 
   addToCart(productId: ID!): Cart!
-  removeFromCart(productId: ID!): Cart!
+  removeFromCart(cartItemId: ID!): Cart!
 }
