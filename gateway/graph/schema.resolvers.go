@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"github.com/bxcodec/faker/v3"
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
@@ -39,8 +40,8 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 
 	log.Println("Current user: ", userId)
 
-	a := append(CartItems, &model.CartItem{
-		ID:          "abcdef",
+	CartItems = append(CartItems, &model.CartItem{
+		ID:          faker.UUIDDigit(),
 		Title:       "Test Product",
 		Description: "Lorem",
 		Price:       17.5,
@@ -48,8 +49,8 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 	})
 
 	c := model.Cart{
-		Items:      a,
-		ItemsCount: len(a),
+		Items:      CartItems,
+		ItemsCount: len(CartItems),
 	}
 
 	return &c, nil
@@ -63,25 +64,11 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, productID string)
 
 	log.Println("Current user: ", userId)
 
-	items := []*model.CartItem{
-		{
-			ID:          "abcdef",
-			Title:       "Test Product",
-			Description: "Lorem",
-			Price:       17.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-		{
-			ID:          "xyzdef",
-			Title:       "Test Product II",
-			Description: "Lorem",
-			Price:       30.5,
-			Image:       "https://via.placeholder.com/150",
-		},
-	}
+	CartItems = append([]*model.CartItem{}, CartItems[1:]...)
+
 	c := model.Cart{
-		Items:      items,
-		ItemsCount: 2,
+		Items:      CartItems,
+		ItemsCount: len(CartItems),
 	}
 
 	return &c, nil
