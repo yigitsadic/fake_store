@@ -11,14 +11,10 @@ services:
       - "3035:3035"
   auth:
     image: yigitsadic/fake_store_auth
-    deploy:
-      mode: replicated
-      replicas: 1
   products:
     image: yigitsadic/fake_store_products
-    deploy:
-      mode: replicated
-      replicas: 1
+  cart:
+    image: yigitsadic/fake_store_cart
   client:
     image: yigitsadic/fake_store_client
     labels:
