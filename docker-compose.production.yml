@@ -7,7 +7,8 @@ services:
       - "traefik.http.routers.gateway.rule=Host(`api.store.yapas.in`)"
       - "traefik.http.routers.gateway.entrypoints=web"
       - "traefik.enable=true"
-      - "traefik.http.services.gateway.loadbalancer.port=3035"
+    ports:
+      - "3035:3035"
   auth:
     image: yigitsadic/fake_store_auth
     deploy:
