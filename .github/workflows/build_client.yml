@@ -16,5 +16,5 @@ jobs:
       - name: Checkout code
         run: |
           docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
-          docker build -t yigitsadic/fake_store_client -f client/Dockerfile --build-arg TARGET_API_URL="${{ env.API_URL }}" .
+          docker build -t yigitsadic/fake_store_client -f client/Dockerfile --build-arg TARGET_API_URL="http://134.122.70.47/query" .
           docker push yigitsadic/fake_store_client:latest
