@@ -26,6 +26,7 @@ export type CartItem = {
   id: Scalars['ID'];
   image: Scalars['String'];
   price: Scalars['Float'];
+  productId: Scalars['ID'];
   title: Scalars['String'];
 };
 
@@ -51,7 +52,7 @@ export type MutationAddToCartArgs = {
 
 
 export type MutationRemoveFromCartArgs = {
-  productId: Scalars['ID'];
+  cartItemId: Scalars['ID'];
 };
 
 export type Product = {
@@ -76,7 +77,7 @@ export type CartContentQueryVariables = Exact<{ [key: string]: never; }>;
 export type CartContentQuery = { __typename?: 'Query', cart: { __typename?: 'Cart', items?: Maybe<Array<{ __typename?: 'CartItem', id: string, title: string, description: string, price: number, image: string }>> } };
 
 export type RemoveFromCartMutationVariables = Exact<{
-  productId: Scalars['ID'];
+  cartItemId: Scalars['ID'];
 }>;
 
 
@@ -146,8 +147,8 @@ export type CartContentQueryHookResult = ReturnType<typeof useCartContentQuery>;
 export type CartContentLazyQueryHookResult = ReturnType<typeof useCartContentLazyQuery>;
 export type CartContentQueryResult = Apollo.QueryResult<CartContentQuery, CartContentQueryVariables>;
 export const RemoveFromCartDocument = gql`
-    mutation removeFromCart($productId: ID!) {
-  removeFromCart(productId: $productId) {
+    mutation removeFromCart($cartItemId: ID!) {
+  removeFromCart(cartItemId: $cartItemId) {
     itemsCount
   }
 }
@@ -167,7 +168,7 @@ export type RemoveFromCartMutationFn = Apollo.MutationFunction<RemoveFromCartMut
  * @example
  * const [removeFromCartMutation, { data, loading, error }] = useRemoveFromCartMutation({
  *   variables: {
- *      productId: // value for 'productId'
+ *      cartItemId: // value for 'cartItemId'
  *   },
  * });
  */

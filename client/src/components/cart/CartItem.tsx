@@ -19,7 +19,7 @@ const CartItem:React.FC<CartItemProps> = ({ item }: CartItemProps) => {
     const handleRemoveFromCart = () => {
         removeFromCartFn({
             variables: {
-                productId: item.id,
+                cartItemId: item.id,
             },
             refetchQueries: [{ query: CART_CONTENT_QUERY }, {query: CART_ITEM_COUNT_QUERY}],
         });
