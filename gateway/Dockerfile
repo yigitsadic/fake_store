@@ -16,4 +16,8 @@ FROM alpine:3.13
 WORKDIR /src
 
 COPY --from=compiler /src/app/gateway_service /src/app
+
+ARG EXPOSE_PORT="3035"
+ENV PORT=$EXPOSE_PORT
+EXPOSE $EXPOSE_PORT
 CMD ["/src/app"]
