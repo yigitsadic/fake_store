@@ -24,7 +24,8 @@ Open `http://localhost:3000` on browser.
 
 ## Demo
 
-[http://store.yapas.in](http://store.yapas.in)
+- [https://store.yapas.in](https://store.yapas.in)
+- [https://api.store.yapas.in](https://api.store.yapas.in)
 
 ## About
 
