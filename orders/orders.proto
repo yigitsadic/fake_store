@@ -1,0 +1,30 @@
+syntax = "proto3";
+package orders;
+
+option go_package = "orders_grpc/orders_grpc";
+
+message OrderListRequest {
+  string userId = 1;
+}
+
+message Product {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  float  price = 4;
+  string image = 5;
+}
+
+message Order {
+  float paymentAmount = 1;
+  string createdAt = 2;
+  repeated Product products = 3;
+}
+
+message OrderListResponse {
+  repeated Order orders = 1;
+}
+
+service OrdersService {
+  rpc ListOrders(OrderListRequest) returns (OrderListResponse) {}
+}
