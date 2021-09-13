@@ -17,10 +17,30 @@ type CartItem struct {
 	Image       string  `json:"image"`
 }
 
-var CartStorage map[string][]CartItem
+type CartDatabase struct {
+	Storage map[string][]CartItem
+}
 
-func init() {
-	CartStorage = make(map[string][]CartItem)
+func NewCartDatabase() *CartDatabase {
+	return &CartDatabase{
+		Storage: make(map[string][]CartItem),
+	}
+}
+
+func (d *CartDatabase) formatCartItemsToGrpcCompatible(items []CartItem) []*cart_grpc.CartItem {
+	var buildItems []*cart_grpc.CartItem
+
+	for _, item := range items {
+		buildItems = append(buildItems, &cart_grpc.CartItem{
+			Id:          item.ID,
+			Title:       item.Title,
+			Description: item.Description,
+			Price:       item.Price,
+			Image:       item.Image,
+		})
+	}
+
+	return buildItems
 }
 
 func main() {
@@ -30,7 +50,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	s := server{}
+	s := server{Database: NewCartDatabase()}
 
 	cart_grpc.RegisterCartServiceServer(grpcServer, &s)
 
