@@ -44,45 +44,30 @@ func (s *server) CartContent(ctx context.Context, req *cart_grpc.CartContentRequ
 }
 
 func (s *server) AddToCart(ctx context.Context, req *cart_grpc.AddToCartRequest) (*cart_grpc.CartContentResponse, error) {
+	var formattedItems []*cart_grpc.CartItem
 	items, ok := CartStorage[req.GetUserId()]
-	if ok {
-		items = append(items, CartItem{
-			ID:          faker.UUIDHyphenated(),
-			ProductID:   req.GetProductId(),
-			Title:       req.GetTitle(),
-			Description: req.GetDescription(),
-			Price:       req.GetPrice(),
-			Image:       req.GetImage(),
-		})
-
-		CartStorage[req.GetUserId()] = items
-
-		formattedItems := formatCartItemsToGrpcCompatible(items)
-		return &cart_grpc.CartContentResponse{
-			ItemCount: 1,
-			CartItems: formattedItems,
-		}, nil
-	} else {
-		cartItem := CartItem{
-			ID:          faker.UUIDHyphenated(),
-			ProductID:   req.GetProductId(),
-			Title:       req.GetTitle(),
-			Description: req.GetDescription(),
-			Price:       req.GetPrice(),
-			Image:       req.GetImage(),
-		}
-
-		CartStorage[req.GetUserId()] = []CartItem{
-			cartItem,
-		}
-
-		formattedItems := formatCartItemsToGrpcCompatible([]CartItem{cartItem})
-
-		return &cart_grpc.CartContentResponse{
-			ItemCount: 1,
-			CartItems: formattedItems,
-		}, nil
+	cartItem := CartItem{
+		ID:          faker.UUIDHyphenated(),
+		ProductID:   req.GetProductId(),
+		Title:       req.GetTitle(),
+		Description: req.GetDescription(),
+		Price:       req.GetPrice(),
+		Image:       req.GetImage(),
 	}
+
+	if ok {
+		items = append(items, cartItem)
+	} else {
+		items = []CartItem{cartItem}
+	}
+
+	CartStorage[req.GetUserId()] = items
+	formattedItems = formatCartItemsToGrpcCompatible(items)
+
+	return &cart_grpc.CartContentResponse{
+		ItemCount: int32(len(items)),
+		CartItems: formattedItems,
+	}, nil
 }
 
 func (s *server) RemoveFromCart(ctx context.Context, req *cart_grpc.RemoveFromCartRequest) (*cart_grpc.CartContentResponse, error) {

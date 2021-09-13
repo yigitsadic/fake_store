@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
@@ -30,7 +30,7 @@ func main() {
 	var productClient product_grpc.ProductServiceClient
 	var cartClient cart_grpc.CartServiceClient
 
-	authConnection, err := acquireAuthConnection()
+	authConnection, err := acquireConnection("auth")
 	if err != nil {
 		authConnection = nil
 
@@ -40,7 +40,7 @@ func main() {
 		defer authConnection.Close()
 	}
 
-	productsConnection, err := acquireProductsConnection()
+	productsConnection, err := acquireConnection("products")
 	if err != nil {
 		productClient = nil
 
@@ -51,7 +51,7 @@ func main() {
 		defer productsConnection.Close()
 	}
 
-	cartConnection, err := acquireCartConnection()
+	cartConnection, err := acquireConnection("cart")
 	if err != nil {
 		cartClient = nil
 
@@ -77,8 +77,6 @@ func main() {
 	// Parses JWT token in the Authorization key in header and stores it to context with key *userId*
 	r.Use(AuthMiddleware)
 
-	r.Use(middleware.Heartbeat("/readiness"))
-
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", srv)
 
@@ -86,36 +84,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
-func acquireAuthConnection() (*grpc.ClientConn, error) {
+func acquireConnection(serviceName string) (*grpc.ClientConn, error) {
 	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
 	defer cancel()
 
-	conn, err := grpc.DialContext(dialCtx, "auth:9000", grpc.WithInsecure(), grpc.WithBlock())
-
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
-}
-
-func acquireProductsConnection() (*grpc.ClientConn, error) {
-	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
-	defer cancel()
-
-	conn, err := grpc.DialContext(dialCtx, "products:9000", grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
-}
-
-func acquireCartConnection() (*grpc.ClientConn, error) {
-	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
-	defer cancel()
-
-	conn, err := grpc.DialContext(dialCtx, "cart:9000", grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.DialContext(dialCtx, fmt.Sprintf("%s:9000", serviceName), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
