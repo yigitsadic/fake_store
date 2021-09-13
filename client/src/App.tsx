@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {Route, Switch} from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
 import NavBar from "./components/nav-bar/NavBar";
 import ProductsList from "./components/products/ProductsList";
 import CartDetailContainer from "./components/cart/CartDetailContainer";
-import OrderList from "./components/orders/OrderList";
 import {TokenPayload} from "./store/auth/token-payload";
 import {useAppDispatch} from "./store/hooks";
 import {login} from "./store/auth/auth";
+import OrdersContainer from "./components/orders/OrdersContainer";
 
 
 const App: React.FC = () => {
@@ -39,7 +39,7 @@ const App: React.FC = () => {
                     </Route>
 
                     <Route path="/orders">
-                        <OrderList />
+                        <OrdersContainer />
                     </Route>
 
                     <Route path="/cart">

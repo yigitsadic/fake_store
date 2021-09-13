@@ -1,16 +1,21 @@
 import React from "react";
-import {useAppSelector} from "../../store/hooks";
-import {selectedCurrentUser} from "../../store/auth/auth";
-import RestrictedArea from "../restricted-area/RestrictedArea";
+import {useListOrdersQuery} from "../../generated/graphql";
+import OrderListItem from "./OrderListItem";
+import {nanoid} from "nanoid";
 
 const OrderList: React.FC = () => {
-    const { loggedIn } = useAppSelector(selectedCurrentUser);
+    const {data, loading, error} = useListOrdersQuery();
 
-    if (loggedIn) {
-        return <h3>Order List Page</h3>;
+    if (loading) return <h3>Loading...</h3>;
+    if (error) return <h3>Error occurred during listing orders...</h3>;
+
+    if (data && data.orders) {
+        return <div>
+            {data.orders.map(order => <OrderListItem key={nanoid()} order={order} />)}
+        </div>
     }
 
-    return <RestrictedArea />;
+    return <h3>Loading...</h3>;
 }
 
 export default OrderList;
