@@ -1,5 +1,6 @@
 
 [![golang badge](https://goreportcard.com/badge/github.com/yigitsadic/fake_store)](https://goreportcard.com/report/github.com/yigitsadic/fake_store)
+![go version](https://img.shields.io/badge/Go-v1.17-blue)
 
 # Fake Store
 
