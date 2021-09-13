@@ -1,3 +1,6 @@
+
+[![golang badge](https://goreportcard.com/badge/github.com/yigitsadic/fake_store)](https://goreportcard.com/report/github.com/yigitsadic/fake_store)
+
 # Fake Store
 
 An example single-repo gRPC powered microservices project. 
