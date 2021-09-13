@@ -14,6 +14,8 @@ services:
     image: yigitsadic/fake_store_products
   cart:
     image: yigitsadic/fake_store_cart
+  orders:
+    image: yigitsadic/fake_store_orders
   client:
     image: yigitsadic/fake_store_client
     labels:
