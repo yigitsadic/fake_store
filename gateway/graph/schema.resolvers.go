@@ -6,19 +6,17 @@ package graph
 import (
 	"context"
 	"errors"
-	"log"
-	"time"
-
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
 	"github.com/yigitsadic/fake_store/gateway/helper"
+	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 )
 
 func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, error) {
-	result, err := r.AuthClient.LoginUser(ctx, &client.AuthRequest{})
+	result, err := r.AuthService.LoginUser(ctx, &client.AuthRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +37,7 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 		return nil, err
 	}
 
-	product, err := r.ProductsClient.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: productID})
+	product, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: productID})
 	if err != nil {
 		return nil, errors.New("product not found")
 	}
@@ -89,7 +87,7 @@ func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
 	var products []*model.Product
 
-	productResp, err := r.ProductsClient.ListProducts(ctx, &product_grpc.ProductListRequest{})
+	productResp, err := r.ProductsService.ListProducts(ctx, &product_grpc.ProductListRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -113,58 +111,34 @@ func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
 		return nil, err
 	}
 
-	log.Println(userId)
-
-	o := model.Order{
-		PaymentAmount: 11.91,
-		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
-		OrderItems: []*model.Product{
-			{
-				ID:          "825c2ca8-cfeb-4ba4-8b34-fb93f7958fa8",
-				Title:       "Cornflakes",
-				Description: "Lorem ipsum dolor sit amet",
-				Price:       6.94,
-				Image:       "https://via.placeholder.com/150",
-			},
-			{
-				ID:          "46541671-d9dd-4e99-9f40-c807e1b14f11",
-				Title:       "Vaccum Bag - 14x20",
-				Description: "Lorem ipsum dolor sit amet",
-				Price:       4.97,
-				Image:       "https://via.placeholder.com/150",
-			},
-		},
+	res, err := r.OrdersService.ListOrders(ctx, &orders_grpc.OrderListRequest{UserId: userId})
+	if err != nil {
+		return nil, err
 	}
 
-	o2 := model.Order{
-		PaymentAmount: 20.64,
-		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
-		OrderItems: []*model.Product{
-			{
-				ID:          "825c2ca8-cfeb-4ba4-8b34-fb93f7958fa8",
-				Title:       "Cornflakes",
-				Description: "Lorem ipsum dolor sit amet",
-				Price:       6.94,
-				Image:       "https://via.placeholder.com/150",
-			},
-			{
-				ID:          "46541671-d9dd-4e99-9f40-c807e1b14f11",
-				Title:       "Vaccum Bag - 14x20",
-				Description: "Lorem ipsum dolor sit amet",
-				Price:       4.97,
-				Image:       "https://via.placeholder.com/150",
-			},
-			{
-				ID:          "9f932b92-3433-4be2-8302-7ac4901c97d6",
-				Title:       "Beef - Bones, Marrow",
-				Price:       8.73,
-				Description: "Lorem ipsum dolor sit amet",
-				Image:       "https://via.placeholder.com/150",
-			},
-		},
+	var orderList []*model.Order
+
+	for _, order := range res.GetOrders() {
+		var products []*model.Product
+
+		for _, product := range order.GetProducts() {
+			products = append(products, &model.Product{
+				ID:          product.GetId(),
+				Title:       product.GetTitle(),
+				Description: product.GetDescription(),
+				Price:       float64(product.GetPrice()),
+				Image:       product.GetImage(),
+			})
+		}
+
+		orderList = append(orderList, &model.Order{
+			PaymentAmount: float64(order.GetPaymentAmount()),
+			CreatedAt:     order.GetCreatedAt(),
+			OrderItems:    products,
+		})
 	}
 
-	return []*model.Order{&o, &o2}, nil
+	return orderList, nil
 }
 
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {

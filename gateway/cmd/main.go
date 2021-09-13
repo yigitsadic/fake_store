@@ -7,6 +7,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
 	"log"
@@ -29,6 +30,7 @@ func main() {
 	var authClient client.AuthServiceClient
 	var productClient product_grpc.ProductServiceClient
 	var cartClient cart_grpc.CartServiceClient
+	var orderClient orders_grpc.OrdersServiceClient
 
 	authConnection, err := acquireConnection("auth")
 	if err != nil {
@@ -62,10 +64,21 @@ func main() {
 		defer cartConnection.Close()
 	}
 
+	ordersConnection, err := acquireConnection("orders")
+	if err != nil {
+		orderClient = nil
+
+		log.Println("Cannot obtain auth service connection")
+	} else {
+		orderClient = orders_grpc.NewOrdersServiceClient(ordersConnection)
+		defer authConnection.Close()
+	}
+
 	resolver := graph.Resolver{
-		AuthClient:     authClient,
-		ProductsClient: productClient,
-		CartService:    cartClient,
+		AuthService:     authClient,
+		ProductsService: productClient,
+		CartService:     cartClient,
+		OrdersService:   orderClient,
 	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver}))
