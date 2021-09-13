@@ -1,7 +1,7 @@
 
 [![golang badge](https://goreportcard.com/badge/github.com/yigitsadic/fake_store)](https://goreportcard.com/report/github.com/yigitsadic/fake_store)
 ![go version](https://img.shields.io/badge/Go-1.17-blue)
-![node version](https://img.shields.io/badge/node-16.0-yellow)
+![node version](https://img.shields.io/badge/node-16.0-green)
 ![typescript version](https://img.shields.io/badge/TypeScript-4.4.2-informational)
 ![react](https://img.shields.io/badge/React-17.0.2-red)
 ![graphql](https://img.shields.io/badge/-%20GraphQL-blueviolet)
