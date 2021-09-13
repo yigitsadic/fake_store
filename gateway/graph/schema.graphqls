@@ -1,6 +1,7 @@
 type Query {
   sayHello: String!
   products: [Product!]
+  orders: [Order!]
   cart: Cart!
 }
 
@@ -31,6 +32,13 @@ type CartItem {
 type Cart {
   items: [CartItem!]
   itemsCount: Int!
+}
+
+type Order {
+  paymentAmount: Float!
+  createdAt: String!
+
+  orderItems: [Product!]
 }
 
 type Mutation {

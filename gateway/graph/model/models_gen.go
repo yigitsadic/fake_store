@@ -23,6 +23,12 @@ type LoginResponse struct {
 	Token    string `json:"token"`
 }
 
+type Order struct {
+	PaymentAmount float64    `json:"paymentAmount"`
+	CreatedAt     string     `json:"createdAt"`
+	OrderItems    []*Product `json:"orderItems"`
+}
+
 type Product struct {
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`

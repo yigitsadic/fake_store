@@ -6,6 +6,8 @@ package graph
 import (
 	"context"
 	"errors"
+	"log"
+	"time"
 
 	"github.com/yigitsadic/fake_store/auth/client/client"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
@@ -103,6 +105,66 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 	}
 
 	return products, nil
+}
+
+func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
+	userId, err := helper.Authenticated(ctx.Value("userId"))
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(userId)
+
+	o := model.Order{
+		PaymentAmount: 11.91,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		OrderItems: []*model.Product{
+			{
+				ID:          "825c2ca8-cfeb-4ba4-8b34-fb93f7958fa8",
+				Title:       "Cornflakes",
+				Description: "Lorem ipsum dolor sit amet",
+				Price:       6.94,
+				Image:       "https://via.placeholder.com/150",
+			},
+			{
+				ID:          "46541671-d9dd-4e99-9f40-c807e1b14f11",
+				Title:       "Vaccum Bag - 14x20",
+				Description: "Lorem ipsum dolor sit amet",
+				Price:       4.97,
+				Image:       "https://via.placeholder.com/150",
+			},
+		},
+	}
+
+	o2 := model.Order{
+		PaymentAmount: 20.64,
+		CreatedAt:     time.Now().UTC().Format(time.RFC3339),
+		OrderItems: []*model.Product{
+			{
+				ID:          "825c2ca8-cfeb-4ba4-8b34-fb93f7958fa8",
+				Title:       "Cornflakes",
+				Description: "Lorem ipsum dolor sit amet",
+				Price:       6.94,
+				Image:       "https://via.placeholder.com/150",
+			},
+			{
+				ID:          "46541671-d9dd-4e99-9f40-c807e1b14f11",
+				Title:       "Vaccum Bag - 14x20",
+				Description: "Lorem ipsum dolor sit amet",
+				Price:       4.97,
+				Image:       "https://via.placeholder.com/150",
+			},
+			{
+				ID:          "9f932b92-3433-4be2-8302-7ac4901c97d6",
+				Title:       "Beef - Bones, Marrow",
+				Price:       8.73,
+				Description: "Lorem ipsum dolor sit amet",
+				Image:       "https://via.placeholder.com/150",
+			},
+		},
+	}
+
+	return []*model.Order{&o, &o2}, nil
 }
 
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
