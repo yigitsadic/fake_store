@@ -9,7 +9,9 @@ const PaymentButton: React.FC = () => {
     }
 
     return <>
-        <button className="btn btn-lg btn-success" disabled={loading || !!error} onClick={() => createLink()}>Proceed to payment</button>
+        <button className="btn btn-lg btn-success" disabled={loading} onClick={() => createLink()}>Proceed to payment</button>
+
+        { error && <p className="lead text-danger">Error occurred during payment. Please try again.</p> }
     </>;
 }
 
