@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {useAppSelector} from "../../store/hooks";
 import {selectedCurrentUser} from "../../store/auth/auth";
 import {useAddItemToCartMutation} from "../../generated/graphql";
