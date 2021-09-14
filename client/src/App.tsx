@@ -33,8 +33,6 @@ const App: React.FC = () => {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const payment_status = urlSearchParams.get("payment_status")
 
-    console.log(payment_status)
-
     if (payment_status === "successful") {
         return <Redirect to="/cart/payment-successful" />
     } else if (payment_status === "payment_failed") {
