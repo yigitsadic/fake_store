@@ -29,6 +29,10 @@ type Order struct {
 	OrderItems    []*Product `json:"orderItems"`
 }
 
+type PaymentStartResponse struct {
+	URL string `json:"url"`
+}
+
 type Product struct {
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`

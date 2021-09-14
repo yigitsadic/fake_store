@@ -3,6 +3,7 @@ import {useCartContentQuery} from "../../generated/graphql";
 
 import CartItem from "./CartItem";
 import EmptyCart from "./EmptyCart";
+import PaymentButton from "./payment-button/PaymentButton";
 
 const CartDetail: React.FC = () => {
     const { data, loading, error } = useCartContentQuery({ fetchPolicy: "network-only" });
@@ -22,7 +23,7 @@ const CartDetail: React.FC = () => {
                 <div className="col-1">&nbsp;</div>
 
                 <div className="col-3">
-                    <button className="btn btn-lg btn-success" disabled={true}>Proceed to payment</button>
+                    <PaymentButton />
                 </div>
             </div>
         } else {

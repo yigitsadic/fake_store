@@ -68,12 +68,17 @@ type ComplexityRoot struct {
 		AddToCart      func(childComplexity int, productID string) int
 		Login          func(childComplexity int) int
 		RemoveFromCart func(childComplexity int, cartItemID string) int
+		StartPayment   func(childComplexity int) int
 	}
 
 	Order struct {
 		CreatedAt     func(childComplexity int) int
 		OrderItems    func(childComplexity int) int
 		PaymentAmount func(childComplexity int) int
+	}
+
+	PaymentStartResponse struct {
+		URL func(childComplexity int) int
 	}
 
 	Product struct {
@@ -88,7 +93,6 @@ type ComplexityRoot struct {
 		Cart     func(childComplexity int) int
 		Orders   func(childComplexity int) int
 		Products func(childComplexity int) int
-		SayHello func(childComplexity int) int
 	}
 }
 
@@ -96,9 +100,9 @@ type MutationResolver interface {
 	Login(ctx context.Context) (*model.LoginResponse, error)
 	AddToCart(ctx context.Context, productID string) (*model.Cart, error)
 	RemoveFromCart(ctx context.Context, cartItemID string) (*model.Cart, error)
+	StartPayment(ctx context.Context) (*model.PaymentStartResponse, error)
 }
 type QueryResolver interface {
-	SayHello(ctx context.Context) (string, error)
 	Products(ctx context.Context) ([]*model.Product, error)
 	Orders(ctx context.Context) ([]*model.Order, error)
 	Cart(ctx context.Context) (*model.Cart, error)
@@ -234,6 +238,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RemoveFromCart(childComplexity, args["cartItemId"].(string)), true
 
+	case "Mutation.startPayment":
+		if e.complexity.Mutation.StartPayment == nil {
+			break
+		}
+
+		return e.complexity.Mutation.StartPayment(childComplexity), true
+
 	case "Order.createdAt":
 		if e.complexity.Order.CreatedAt == nil {
 			break
@@ -254,6 +265,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Order.PaymentAmount(childComplexity), true
+
+	case "PaymentStartResponse.url":
+		if e.complexity.PaymentStartResponse.URL == nil {
+			break
+		}
+
+		return e.complexity.PaymentStartResponse.URL(childComplexity), true
 
 	case "Product.description":
 		if e.complexity.Product.Description == nil {
@@ -310,13 +328,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Products(childComplexity), true
-
-	case "Query.sayHello":
-		if e.complexity.Query.SayHello == nil {
-			break
-		}
-
-		return e.complexity.Query.SayHello(childComplexity), true
 
 	}
 	return 0, false
@@ -383,7 +394,6 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `type Query {
-  sayHello: String!
   products: [Product!]
   orders: [Order!]
   cart: Cart!
@@ -425,11 +435,17 @@ type Order {
   orderItems: [Product!]
 }
 
+type PaymentStartResponse {
+  url: String!
+}
+
 type Mutation {
   login: LoginResponse!
 
   addToCart(productId: ID!): Cart!
   removeFromCart(cartItemId: ID!): Cart!
+
+  startPayment: PaymentStartResponse!
 }
 `, BuiltIn: false},
 }
@@ -1058,6 +1074,41 @@ func (ec *executionContext) _Mutation_removeFromCart(ctx context.Context, field 
 	return ec.marshalNCart2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐCart(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_startPayment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().StartPayment(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PaymentStartResponse)
+	fc.Result = res
+	return ec.marshalNPaymentStartResponse2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐPaymentStartResponse(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Order_paymentAmount(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1158,6 +1209,41 @@ func (ec *executionContext) _Order_orderItems(ctx context.Context, field graphql
 	res := resTmp.([]*model.Product)
 	fc.Result = res
 	return ec.marshalOProduct2ᚕᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐProductᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PaymentStartResponse_url(ctx context.Context, field graphql.CollectedField, obj *model.PaymentStartResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PaymentStartResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Product_id(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
@@ -1319,41 +1405,6 @@ func (ec *executionContext) _Product_image(ctx context.Context, field graphql.Co
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Image, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_sayHello(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().SayHello(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2823,6 +2874,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "startPayment":
+			out.Values[i] = ec._Mutation_startPayment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2857,6 +2913,33 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "orderItems":
 			out.Values[i] = ec._Order_orderItems(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var paymentStartResponseImplementors = []string{"PaymentStartResponse"}
+
+func (ec *executionContext) _PaymentStartResponse(ctx context.Context, sel ast.SelectionSet, obj *model.PaymentStartResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, paymentStartResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PaymentStartResponse")
+		case "url":
+			out.Values[i] = ec._PaymentStartResponse_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2930,20 +3013,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "sayHello":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_sayHello(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "products":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -3351,6 +3420,20 @@ func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋyigitsadicᚋfake_st
 		return graphql.Null
 	}
 	return ec._Order(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPaymentStartResponse2githubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐPaymentStartResponse(ctx context.Context, sel ast.SelectionSet, v model.PaymentStartResponse) graphql.Marshaler {
+	return ec._PaymentStartResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPaymentStartResponse2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐPaymentStartResponse(ctx context.Context, sel ast.SelectionSet, v *model.PaymentStartResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._PaymentStartResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐProduct(ctx context.Context, sel ast.SelectionSet, v *model.Product) graphql.Marshaler {

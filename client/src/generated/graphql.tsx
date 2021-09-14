@@ -43,6 +43,7 @@ export type Mutation = {
   addToCart: Cart;
   login: LoginResponse;
   removeFromCart: Cart;
+  startPayment: PaymentStartResponse;
 };
 
 
@@ -62,6 +63,11 @@ export type Order = {
   paymentAmount: Scalars['Float'];
 };
 
+export type PaymentStartResponse = {
+  __typename?: 'PaymentStartResponse';
+  url: Scalars['String'];
+};
+
 export type Product = {
   __typename?: 'Product';
   description: Scalars['String'];
@@ -76,13 +82,17 @@ export type Query = {
   cart: Cart;
   orders?: Maybe<Array<Order>>;
   products?: Maybe<Array<Product>>;
-  sayHello: Scalars['String'];
 };
 
 export type CartContentQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type CartContentQuery = { __typename?: 'Query', cart: { __typename?: 'Cart', items?: Maybe<Array<{ __typename?: 'CartItem', id: string, title: string, description: string, price: number, image: string }>> } };
+
+export type CreatePaymentLinkMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreatePaymentLinkMutation = { __typename?: 'Mutation', startPayment: { __typename?: 'PaymentStartResponse', url: string } };
 
 export type RemoveFromCartMutationVariables = Exact<{
   cartItemId: Scalars['ID'];
@@ -154,6 +164,38 @@ export function useCartContentLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type CartContentQueryHookResult = ReturnType<typeof useCartContentQuery>;
 export type CartContentLazyQueryHookResult = ReturnType<typeof useCartContentLazyQuery>;
 export type CartContentQueryResult = Apollo.QueryResult<CartContentQuery, CartContentQueryVariables>;
+export const CreatePaymentLinkDocument = gql`
+    mutation createPaymentLink {
+  startPayment {
+    url
+  }
+}
+    `;
+export type CreatePaymentLinkMutationFn = Apollo.MutationFunction<CreatePaymentLinkMutation, CreatePaymentLinkMutationVariables>;
+
+/**
+ * __useCreatePaymentLinkMutation__
+ *
+ * To run a mutation, you first call `useCreatePaymentLinkMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePaymentLinkMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPaymentLinkMutation, { data, loading, error }] = useCreatePaymentLinkMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCreatePaymentLinkMutation(baseOptions?: Apollo.MutationHookOptions<CreatePaymentLinkMutation, CreatePaymentLinkMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePaymentLinkMutation, CreatePaymentLinkMutationVariables>(CreatePaymentLinkDocument, options);
+      }
+export type CreatePaymentLinkMutationHookResult = ReturnType<typeof useCreatePaymentLinkMutation>;
+export type CreatePaymentLinkMutationResult = Apollo.MutationResult<CreatePaymentLinkMutation>;
+export type CreatePaymentLinkMutationOptions = Apollo.BaseMutationOptions<CreatePaymentLinkMutation, CreatePaymentLinkMutationVariables>;
 export const RemoveFromCartDocument = gql`
     mutation removeFromCart($cartItemId: ID!) {
   removeFromCart(cartItemId: $cartItemId) {

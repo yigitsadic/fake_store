@@ -1,5 +1,4 @@
 type Query {
-  sayHello: String!
   products: [Product!]
   orders: [Order!]
   cart: Cart!
@@ -41,9 +40,15 @@ type Order {
   orderItems: [Product!]
 }
 
+type PaymentStartResponse {
+  url: String!
+}
+
 type Mutation {
   login: LoginResponse!
 
   addToCart(productId: ID!): Cart!
   removeFromCart(cartItemId: ID!): Cart!
+
+  startPayment: PaymentStartResponse!
 }
