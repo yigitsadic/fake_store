@@ -7,11 +7,12 @@ services:
       dockerfile: ./gateway/Dockerfile
     ports:
       - "3035:3035"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3035/readiness" ]
-      interval: 200s
-      timeout: 200s
-      retries: 5
+  fake_payment_provider:
+    build:
+      context: .
+      dockerfile: ./fake_payment_provider/Dockerfile
+    ports:
+      - "5055:5055"
   auth:
     build:
       context: .
