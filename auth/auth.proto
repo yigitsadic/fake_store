@@ -1,7 +1,7 @@
 syntax = "proto3";
 package auth;
 
-option go_package = "client/client";
+option go_package = "auth_grpc/auth_grpc";
 
 message AuthRequest {}
 

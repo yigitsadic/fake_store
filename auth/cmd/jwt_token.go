@@ -5,14 +5,14 @@ import (
 	"time"
 )
 
-type Claims struct {
+type claims struct {
 	Avatar   string `json:"avatar"`
 	FullName string `json:"fullName"`
 	jwt.StandardClaims
 }
 
-func GenerateJWTToken(id, avatar, fullName string) string {
-	c := Claims{
+func generateJWTToken(id, avatar, fullName string) string {
+	c := claims{
 		Avatar:   avatar,
 		FullName: fullName,
 		StandardClaims: jwt.StandardClaims{

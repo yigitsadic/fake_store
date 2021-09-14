@@ -11,13 +11,13 @@ type server struct {
 }
 
 func (s *server) ListProducts(context.Context, *product_grpc.ProductListRequest) (*product_grpc.ProductList, error) {
-	return &product_grpc.ProductList{Products: ProductDB}, nil
+	return &product_grpc.ProductList{Products: productDB}, nil
 }
 
 func (s *server) ProductDetail(ctx context.Context, req *product_grpc.ProductDetailRequest) (*product_grpc.Product, error) {
 	var found *product_grpc.Product
 
-	for _, item := range ProductDB {
+	for _, item := range productDB {
 		if req.GetProductId() == item.GetId() {
 			found = &product_grpc.Product{
 				Id:          item.GetId(),

@@ -5,7 +5,7 @@ import (
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
 )
 
-func ConvertCartFromService(cartItems []*cart_grpc.CartItem) []*model.CartItem {
+func convertCartFromService(cartItems []*cart_grpc.CartItem) []*model.CartItem {
 	var buildItems []*model.CartItem
 
 	for _, item := range cartItems {

@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"context"
@@ -7,30 +7,35 @@ import (
 	"strings"
 )
 
-func parseUserIdFromJWT(givenToken string) string {
+type ctxKey string
+
+const userIDCtxKey = ctxKey("userID")
+
+func parseUserIDFromJWT(givenToken string) string {
 	token, err := jwt.Parse(givenToken, func(tk *jwt.Token) (interface{}, error) {
 		return []byte("FAKE_STORE_AUTH"), nil
 	})
 
 	if err == nil {
 		tokenMap := token.Claims.(jwt.MapClaims)
-		if userId, ok := tokenMap["jti"].(string); ok {
-			return userId
+		if userID, ok := tokenMap["jti"].(string); ok {
+			return userID
 		}
 	}
 
 	return ""
 }
 
-func AuthMiddleware(next http.Handler) http.Handler {
+// Middleware chi http middleware for reading token in header['authorization']
+func Middleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 
 		token := strings.Replace(authHeader, "Bearer ", "", 1)
-		userId := parseUserIdFromJWT(token)
+		userID := parseUserIDFromJWT(token)
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "userId", userId)
+		ctx = context.WithValue(ctx, userIDCtxKey, userID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

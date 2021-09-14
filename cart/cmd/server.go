@@ -8,12 +8,11 @@ import (
 )
 
 type server struct {
-	Database *CartDatabase
+	Database *cartDatabase
 	cart_grpc.UnimplementedCartServiceServer
 }
 
-func (s *server) CartContent(ctx context.Context, req *cart_grpc.CartContentRequest) (*cart_grpc.CartContentResponse, error) {
-
+func (s *server) CartContent(_ context.Context, req *cart_grpc.CartContentRequest) (*cart_grpc.CartContentResponse, error) {
 	items, ok := s.Database.Storage[req.GetUserId()]
 	if ok {
 		res := s.Database.formatCartItemsToGrpcCompatible(items)
@@ -22,18 +21,18 @@ func (s *server) CartContent(ctx context.Context, req *cart_grpc.CartContentRequ
 			ItemCount: int32(len(res)),
 			CartItems: res,
 		}, nil
-	} else {
-		return &cart_grpc.CartContentResponse{
-			ItemCount: 0,
-			CartItems: nil,
-		}, nil
 	}
+
+	return &cart_grpc.CartContentResponse{
+		ItemCount: 0,
+		CartItems: nil,
+	}, nil
 }
 
-func (s *server) AddToCart(ctx context.Context, req *cart_grpc.AddToCartRequest) (*cart_grpc.CartContentResponse, error) {
+func (s *server) AddToCart(_ context.Context, req *cart_grpc.AddToCartRequest) (*cart_grpc.CartContentResponse, error) {
 	var formattedItems []*cart_grpc.CartItem
 	items, ok := s.Database.Storage[req.GetUserId()]
-	cartItem := CartItem{
+	item := cartItem{
 		ID:          faker.UUIDHyphenated(),
 		ProductID:   req.GetProductId(),
 		Title:       req.GetTitle(),
@@ -43,9 +42,9 @@ func (s *server) AddToCart(ctx context.Context, req *cart_grpc.AddToCartRequest)
 	}
 
 	if ok {
-		items = append(items, cartItem)
+		items = append(items, item)
 	} else {
-		items = []CartItem{cartItem}
+		items = []cartItem{item}
 	}
 
 	s.Database.Storage[req.GetUserId()] = items
@@ -57,10 +56,10 @@ func (s *server) AddToCart(ctx context.Context, req *cart_grpc.AddToCartRequest)
 	}, nil
 }
 
-func (s *server) RemoveFromCart(ctx context.Context, req *cart_grpc.RemoveFromCartRequest) (*cart_grpc.CartContentResponse, error) {
+func (s *server) RemoveFromCart(_ context.Context, req *cart_grpc.RemoveFromCartRequest) (*cart_grpc.CartContentResponse, error) {
 	items, ok := s.Database.Storage[req.GetUserId()]
 	if ok {
-		var filteredItems []CartItem
+		var filteredItems []cartItem
 
 		for _, item := range items {
 			if item.ID != req.GetCartItemId() {
@@ -76,7 +75,7 @@ func (s *server) RemoveFromCart(ctx context.Context, req *cart_grpc.RemoveFromCa
 			ItemCount: int32(len(res)),
 			CartItems: res,
 		}, nil
-	} else {
-		return nil, errors.New("no item found in cart")
 	}
+
+	return nil, errors.New("no item found in cart")
 }

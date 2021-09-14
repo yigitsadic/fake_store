@@ -6,17 +6,17 @@ package graph
 import (
 	"context"
 	"errors"
-	"github.com/yigitsadic/fake_store/auth/client/client"
+	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+	"github.com/yigitsadic/fake_store/gateway/auth"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
-	"github.com/yigitsadic/fake_store/gateway/helper"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 )
 
 func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, error) {
-	result, err := r.AuthService.LoginUser(ctx, &client.AuthRequest{})
+	result, err := r.AuthService.LoginUser(ctx, &auth_grpc.AuthRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, err
 }
 
 func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*model.Cart, error) {
-	userId, err := helper.Authenticated(ctx.Value("userId"))
+	userID, err := auth.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 	}
 
 	res, err := r.CartService.AddToCart(ctx, &cart_grpc.AddToCartRequest{
-		UserId:      userId,
+		UserId:      userID,
 		ProductId:   product.Id,
 		Title:       product.Title,
 		Description: product.Description,
@@ -55,19 +55,19 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 	}
 
 	return &model.Cart{
-		Items:      ConvertCartFromService(res.GetCartItems()),
+		Items:      convertCartFromService(res.GetCartItems()),
 		ItemsCount: int(res.GetItemCount()),
 	}, nil
 }
 
 func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string) (*model.Cart, error) {
-	userId, err := helper.Authenticated(ctx.Value("userId"))
+	userID, err := auth.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	res, err := r.CartService.RemoveFromCart(ctx, &cart_grpc.RemoveFromCartRequest{
-		UserId:     userId,
+		UserId:     userID,
 		CartItemId: cartItemID,
 	})
 	if err != nil {
@@ -75,7 +75,7 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string
 	}
 
 	return &model.Cart{
-		Items:      ConvertCartFromService(res.GetCartItems()),
+		Items:      convertCartFromService(res.GetCartItems()),
 		ItemsCount: int(res.GetItemCount()),
 	}, nil
 }
@@ -106,12 +106,12 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
-	userId, err := helper.Authenticated(ctx.Value("userId"))
+	userID, err := auth.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := r.OrdersService.ListOrders(ctx, &orders_grpc.OrderListRequest{UserId: userId})
+	res, err := r.OrdersService.ListOrders(ctx, &orders_grpc.OrderListRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -142,18 +142,18 @@ func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
 }
 
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-	userId, err := helper.Authenticated(ctx.Value("userId"))
+	userID, err := auth.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := r.CartService.CartContent(ctx, &cart_grpc.CartContentRequest{UserId: userId})
+	res, err := r.CartService.CartContent(ctx, &cart_grpc.CartContentRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.Cart{
-		Items:      ConvertCartFromService(res.GetCartItems()),
+		Items:      convertCartFromService(res.GetCartItems()),
 		ItemsCount: int(res.GetItemCount()),
 	}, nil
 }

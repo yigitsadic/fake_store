@@ -8,10 +8,10 @@ import (
 	"net"
 )
 
-var ProductDB []*product_grpc.Product
+var productDB []*product_grpc.Product
 
 func init() {
-	ProductDB = []*product_grpc.Product{
+	productDB = []*product_grpc.Product{
 		{
 			Id:          "825c2ca8-cfeb-4ba4-8b34-fb93f7958fa8",
 			Title:       "Cornflakes",

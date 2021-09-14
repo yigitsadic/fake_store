@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/cors"
-	"github.com/yigitsadic/fake_store/auth/client/client"
+	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+	"github.com/yigitsadic/fake_store/gateway/auth"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
@@ -27,7 +28,7 @@ func main() {
 		port = "3035"
 	}
 
-	var authClient client.AuthServiceClient
+	var authClient auth_grpc.AuthServiceClient
 	var productClient product_grpc.ProductServiceClient
 	var cartClient cart_grpc.CartServiceClient
 	var orderClient orders_grpc.OrdersServiceClient
@@ -38,7 +39,7 @@ func main() {
 
 		log.Println("Cannot obtain auth service connection")
 	} else {
-		authClient = client.NewAuthServiceClient(authConnection)
+		authClient = auth_grpc.NewAuthServiceClient(authConnection)
 		defer authConnection.Close()
 	}
 
@@ -88,7 +89,7 @@ func main() {
 	r.Use(cors.AllowAll().Handler)
 
 	// Parses JWT token in the Authorization key in header and stores it to context with key *userId*
-	r.Use(AuthMiddleware)
+	r.Use(auth.Middleware)
 
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", srv)
