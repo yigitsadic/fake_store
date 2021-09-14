@@ -1,6 +1,3 @@
 # Fake Payment Provider
 
-It shows you complete payment button and redirects you to
-payment complete hook.
-
-
+Mocks PayPal, Stripe like payment provider systems hook and redirect mechanisms.
