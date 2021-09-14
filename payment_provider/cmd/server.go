@@ -20,9 +20,7 @@ type paymentIntent struct {
 
 	SuccessURL string
 	FailureURL string
-
-	HookURL         string
-	HookCredentials string
+	HookURL    string
 }
 
-var dataBase = make(map[string]paymentIntent)
+var database = make(map[string]paymentIntent)

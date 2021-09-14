@@ -44,7 +44,7 @@ func handleCreatePaymentIntent(writer http.ResponseWriter, request *http.Request
 		FailureURL:  b.FailureURL,
 	}
 
-	dataBase[intent.ID] = intent
+	database[intent.ID] = intent
 
 	writer.Header().Set("Content-Type", "application/json")
 
@@ -62,7 +62,7 @@ func handleShowPaymentIntent(tmp *template.Template) func(writer http.ResponseWr
 	return func(writer http.ResponseWriter, request *http.Request) {
 		paymentIntentID := chi.URLParam(request, "paymentIntentID")
 
-		record, ok := dataBase[paymentIntentID]
+		record, ok := database[paymentIntentID]
 
 		if ok {
 			tmp.Execute(writer, &record)
@@ -77,7 +77,7 @@ func handleShowPaymentIntent(tmp *template.Template) func(writer http.ResponseWr
 func handleCompletePaymentIntent(writer http.ResponseWriter, request *http.Request) {
 	paymentIntentID := chi.URLParam(request, "paymentIntentID")
 
-	record, ok := dataBase[paymentIntentID]
+	record, ok := database[paymentIntentID]
 	targetURL := record.FailureURL
 
 	if ok {
@@ -102,7 +102,7 @@ func handleCompletePaymentIntent(writer http.ResponseWriter, request *http.Reque
 			FailureURL:  record.FailureURL,
 		}
 
-		dataBase[newRecord.ID] = newRecord
+		database[newRecord.ID] = newRecord
 
 		targetURL = record.SuccessURL
 	}

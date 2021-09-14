@@ -18,6 +18,7 @@ ARG BASE_URL="http://localhost:$PORT"
 ENV PORT=$PORT
 ENV BASE_URL=$BASE_URL
 
+COPY --from=compiler /src/app/payment_provider/templates /src/templates
 COPY --from=compiler /src/app/payment_provider_binary /src/app
 
 EXPOSE $PORT
