@@ -21,8 +21,6 @@ const CartItem:React.FC<CartItemProps> = ({ item }: CartItemProps) => {
                 cartItemId: item.id,
             },
             refetchQueries: [{ query: CART_CONTENT_QUERY }],
-        }).then(item => {
-            console.log(item.data?.removeFromCart.itemsCount);
         });
     }
 
