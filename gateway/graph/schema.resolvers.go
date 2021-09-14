@@ -6,6 +6,9 @@ package graph
 import (
 	"context"
 	"errors"
+	"github.com/bxcodec/faker/v3"
+	"github.com/cenkalti/backoff/v4"
+
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/gateway/auth"
@@ -80,8 +83,27 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string
 	}, nil
 }
 
-func (r *queryResolver) SayHello(ctx context.Context) (string, error) {
-	return "Hello World", nil
+func (r *mutationResolver) StartPayment(ctx context.Context) (*model.PaymentStartResponse, error) {
+	var err error
+	var paymentURL string
+
+	operation := func() error {
+		paymentURL, err = createPaymentIntent(ctx, r.PaymentProviderURL, paymentIntentRequest{
+			Amount:      42.74,
+			ReferenceID: faker.UUIDHyphenated(),
+			HookURL:     r.HookURL,
+			SuccessURL:  r.SuccessURL,
+			FailureURL:  r.FailureURL,
+		})
+
+		return err
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 5))
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.PaymentStartResponse{URL: paymentURL}, nil
 }
 
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {

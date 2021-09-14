@@ -15,4 +15,9 @@ type Resolver struct {
 	ProductsService product_grpc.ProductServiceClient
 	CartService     cart_grpc.CartServiceClient
 	OrdersService   orders_grpc.OrdersServiceClient
+
+	PaymentProviderURL string
+	SuccessURL         string
+	FailureURL         string
+	HookURL            string
 }
