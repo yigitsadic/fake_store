@@ -7,10 +7,10 @@ services:
       dockerfile: ./gateway/Dockerfile
     ports:
       - "3035:3035"
-  fake_payment_provider:
+  payment_provider:
     build:
       context: .
-      dockerfile: ./fake_payment_provider/Dockerfile
+      dockerfile: ./payment_provider/Dockerfile
     ports:
       - "5055:5055"
   auth:
