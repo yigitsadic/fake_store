@@ -8,23 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 var baseURL string
-
-func init() {
-	database["yigit"] = paymentIntent{
-		ID:          "yigit",
-		Amount:      15.25,
-		ReferenceID: "1231245245",
-		Status:      paymentInitialized,
-		CreatedAt:   time.Now().UTC(),
-		SuccessURL:  "http://localhost:3000/orders?success",
-		FailureURL:  "http://localhost:3000/orders?success",
-		HookURL:     "http://localhost:3000/orders?success",
-	}
-}
 
 func main() {
 	port := os.Getenv("PORT")
