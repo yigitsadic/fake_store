@@ -15,8 +15,8 @@ interface CartItemProps {
 const CartItem:React.FC<CartItemProps> = ({ item }: CartItemProps) => {
     const [removeFromCartFn, { loading, error }] = useRemoveFromCartMutation();
 
-    const handleRemoveFromCart = () => {
-        removeFromCartFn({
+    const handleRemoveFromCart = async () => {
+        await removeFromCartFn({
             variables: {
                 cartItemId: item.id,
             },
