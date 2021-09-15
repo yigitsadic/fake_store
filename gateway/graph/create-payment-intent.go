@@ -35,6 +35,7 @@ func buildRequest(ctx context.Context, target string, message paymentIntentReque
 		return nil, err
 	}
 
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
 	return req, nil
