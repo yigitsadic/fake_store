@@ -16,5 +16,5 @@ jobs:
       - name: Checkout code
         run: |
           docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
-          docker build -t yigitsadic/fake_store_payment_provider -f payment_provider/Dockerfile .
+          docker build -t yigitsadic/fake_store_payment_provider -f payment_provider/Dockerfile --build-arg BASE_URL="https://payments.store.yapas.in" .
           docker push yigitsadic/fake_store_payment_provider:latest
