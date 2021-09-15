@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"google.golang.org/grpc"
 	"log"
@@ -49,8 +51,26 @@ func main() {
 		log.Fatalf("failed to listen: %v\n", err)
 	}
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "redis:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatalln("Unable to connect redis")
+	}
+
 	grpcServer := grpc.NewServer()
 	s := server{Database: newCartDatabase()}
+
+	events := eventListener{
+		RedisClient: rdb,
+		Ctx:         context.Background(),
+		Database:    s.Database,
+	}
+
+	go events.ListenFlushCartEvents()
 
 	cart_grpc.RegisterCartServiceServer(grpcServer, &s)
 
