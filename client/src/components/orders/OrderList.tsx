@@ -2,6 +2,7 @@ import React from "react";
 import {useListOrdersQuery} from "../../generated/graphql";
 import OrderListItem from "./OrderListItem";
 import {nanoid} from "nanoid";
+import EmptyOrderList from "./EmptyOrderList";
 
 const OrderList: React.FC = () => {
     const {data, loading, error} = useListOrdersQuery();
@@ -15,7 +16,7 @@ const OrderList: React.FC = () => {
         </div>
     }
 
-    return <h3>Loading...</h3>;
+    return <EmptyOrderList />;
 }
 
 export default OrderList;
