@@ -1,5 +1,5 @@
 import React, {useEffect} from "react";
-import {Redirect, Route, Switch} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
 import NavBar from "./components/nav-bar/NavBar";
@@ -30,15 +30,6 @@ const App: React.FC = () => {
         }
     }, [token]);
 
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const payment_status = urlSearchParams.get("payment_status")
-
-    if (payment_status === "successful") {
-        return <Redirect to="/cart/payment-successful" />
-    } else if (payment_status === "payment_failed") {
-        return <Redirect to="/cart/payment-failed" />
-    }
-
     return (
         <>
             <NavBar />
@@ -53,11 +44,11 @@ const App: React.FC = () => {
                         <OrdersContainer />
                     </Route>
 
-                    <Route path="/cart/payment-failed">
+                    <Route path="/payment_failed">
                         <PaymentFailed />
                     </Route>
 
-                    <Route path="/cart/payment-successful">
+                    <Route path="/payment_successful">
                         <PaymentSuccessful />
                     </Route>
 
