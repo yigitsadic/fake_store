@@ -8,6 +8,27 @@ services:
       - "traefik.http.routers.gateway.rule=Host(`api.store.yapas.in`)"
       - "traefik.http.routers.gateway.entrypoints=websecure"
       - "traefik.http.routers.gateway.tls.certresolver=myresolver"
+    environment:
+      - "BASE_URL=https://api.store.yapas.in"
+      - "CLIENT_BASE_URL=https://store.yapas.in"
+      - "PAYMENT_PROVIDER_BASE_URL=https://payments.store.yapas.in/payments/create-payment-intent"
+      - "HOOK_URL=https://payments.hook.store.yapas.in/api/payment/webhooks"
+  payment_provider:
+    image: yigitsadic/fake_store_payment_provider
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.payment_provider.rule=Host(`payments.store.yapas.in`)"
+      - "traefik.http.routers.payment_provider.entrypoints=websecure"
+      - "traefik.http.routers.payment_provider.tls.certresolver=myresolver"
+    environment:
+      - "BASE_URL=https://payments.store.yapas.in"
+  hook:
+    image: yigitsadic/fake_store_hook
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hook.rule=Host(`payments.hook.store.yapas.in`)"
+      - "traefik.http.routers.hook.entrypoints=websecure"
+      - "traefik.http.routers.hook.tls.certresolver=myresolver"
   auth:
     image: yigitsadic/fake_store_auth
   products:
@@ -23,15 +44,6 @@ services:
       - "traefik.http.routers.client.rule=Host(`store.yapas.in`)"
       - "traefik.http.routers.client.entrypoints=websecure"
       - "traefik.http.routers.client.tls.certresolver=myresolver"
-  visualizer:
-    image: dockersamples/visualizer:stable
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    labels:
-      - "traefik.http.routers.visualizer.rule=Host(`visual.store.yapas.in`)"
-      - "traefik.enable=true"
-      - "traefik.http.routers.visualizer.entrypoints=websecure"
-      - "traefik.http.routers.visualizer.tls.certresolver=myresolver"
   traefik:
     image: traefik:v2.5
     command:
@@ -53,3 +65,5 @@ services:
     volumes:
       - ./letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
+  redis:
+    image: redis:alpine3.13
