@@ -39,7 +39,7 @@ func main() {
 	go listener.ListenPaymentCompleteEvents()
 
 	grpcServer := grpc.NewServer()
-	s := server{}
+	s := server{Database: orderDatabase}
 
 	orders_grpc.RegisterOrdersServiceServer(grpcServer, &s)
 
