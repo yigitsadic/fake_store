@@ -82,3 +82,14 @@ jobs:
           docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
           docker build -t yigitsadic/fake_store_payment_provider -f orders/Dockerfile .
           docker push yigitsadic/fake_store_payment_provider:latest
+  build_and_push_hook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout code
+        run: |
+          docker login -p ${{ secrets.DOCKER_PASSWORD }} -u ${{ secrets.DOCKER_USERNAME }}
+          docker build -t yigitsadic/fake_store_hook -f hook/Dockerfile .
+          docker push yigitsadic/fake_store_hook:latest
