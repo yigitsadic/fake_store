@@ -7,6 +7,25 @@ message OrderListRequest {
   string userId = 1;
 }
 
+message CartItem {
+  string id = 1;
+  string productId = 2;
+  string title = 3;
+  string description = 4;
+  float price = 5;
+  string image = 6;
+}
+
+message StartOrderRequest {
+  string userId = 1;
+  repeated CartItem cartItems = 2;
+}
+
+message StartOrderResponse {
+  string id = 1;
+  float paymentAmount = 2;
+}
+
 message Product {
   string id = 1;
   string title = 2;
@@ -16,9 +35,18 @@ message Product {
 }
 
 message Order {
-  float paymentAmount = 1;
-  string createdAt = 2;
-  repeated Product products = 3;
+  enum OrderStatus {
+    _ = 0;
+    STARTED = 1;
+    COMPLETED = 2;
+  }
+
+  string id = 1;
+  string userId = 2;
+  float paymentAmount = 3;
+  string createdAt = 4;
+  OrderStatus status = 5;
+  repeated Product products = 6;
 }
 
 message OrderListResponse {
@@ -26,5 +54,6 @@ message OrderListResponse {
 }
 
 service OrdersService {
+  rpc StartOrder(StartOrderRequest) returns (StartOrderResponse) {}
   rpc ListOrders(OrderListRequest) returns (OrderListResponse) {}
 }

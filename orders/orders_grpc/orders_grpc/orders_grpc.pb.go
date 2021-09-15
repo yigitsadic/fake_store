@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrdersServiceClient interface {
+	StartOrder(ctx context.Context, in *StartOrderRequest, opts ...grpc.CallOption) (*StartOrderResponse, error)
 	ListOrders(ctx context.Context, in *OrderListRequest, opts ...grpc.CallOption) (*OrderListResponse, error)
 }
 
@@ -27,6 +28,15 @@ type ordersServiceClient struct {
 
 func NewOrdersServiceClient(cc grpc.ClientConnInterface) OrdersServiceClient {
 	return &ordersServiceClient{cc}
+}
+
+func (c *ordersServiceClient) StartOrder(ctx context.Context, in *StartOrderRequest, opts ...grpc.CallOption) (*StartOrderResponse, error) {
+	out := new(StartOrderResponse)
+	err := c.cc.Invoke(ctx, "/orders.OrdersService/StartOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *ordersServiceClient) ListOrders(ctx context.Context, in *OrderListRequest, opts ...grpc.CallOption) (*OrderListResponse, error) {
@@ -42,6 +52,7 @@ func (c *ordersServiceClient) ListOrders(ctx context.Context, in *OrderListReque
 // All implementations must embed UnimplementedOrdersServiceServer
 // for forward compatibility
 type OrdersServiceServer interface {
+	StartOrder(context.Context, *StartOrderRequest) (*StartOrderResponse, error)
 	ListOrders(context.Context, *OrderListRequest) (*OrderListResponse, error)
 	mustEmbedUnimplementedOrdersServiceServer()
 }
@@ -50,6 +61,9 @@ type OrdersServiceServer interface {
 type UnimplementedOrdersServiceServer struct {
 }
 
+func (UnimplementedOrdersServiceServer) StartOrder(context.Context, *StartOrderRequest) (*StartOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartOrder not implemented")
+}
 func (UnimplementedOrdersServiceServer) ListOrders(context.Context, *OrderListRequest) (*OrderListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrders not implemented")
 }
@@ -64,6 +78,24 @@ type UnsafeOrdersServiceServer interface {
 
 func RegisterOrdersServiceServer(s grpc.ServiceRegistrar, srv OrdersServiceServer) {
 	s.RegisterService(&OrdersService_ServiceDesc, srv)
+}
+
+func _OrdersService_StartOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrdersServiceServer).StartOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/orders.OrdersService/StartOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrdersServiceServer).StartOrder(ctx, req.(*StartOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _OrdersService_ListOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -91,6 +123,10 @@ var OrdersService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "orders.OrdersService",
 	HandlerType: (*OrdersServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StartOrder",
+			Handler:    _OrdersService_StartOrder_Handler,
+		},
 		{
 			MethodName: "ListOrders",
 			Handler:    _OrdersService_ListOrders_Handler,
