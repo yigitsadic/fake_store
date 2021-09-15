@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bxcodec/faker/v3"
 	"github.com/cenkalti/backoff/v4"
 	"github.com/go-chi/chi/v5"
@@ -40,6 +39,7 @@ func handleCreatePaymentIntent(writer http.ResponseWriter, request *http.Request
 		ReferenceID: b.ReferenceID,
 		Status:      paymentInitialized,
 		CreatedAt:   time.Now().UTC(),
+		HookURL:     b.HookURL,
 		SuccessURL:  b.SuccessURL,
 		FailureURL:  b.FailureURL,
 	}
@@ -54,7 +54,7 @@ func handleCreatePaymentIntent(writer http.ResponseWriter, request *http.Request
 		ReferenceID: intent.ReferenceID,
 		Status:      intent.Status,
 		CreatedAt:   intent.CreatedAt,
-		PaymentURL:  fmt.Sprintf("%s/payments/%s", baseURL, intent.ID),
+		PaymentURL:  baseURL + "/payments/" + intent.ID,
 	})
 }
 
