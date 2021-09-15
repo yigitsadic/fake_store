@@ -124,7 +124,7 @@ func main() {
 }
 
 func acquireConnection(serviceName string) (*grpc.ClientConn, error) {
-	dialCtx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	dialCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	conn, err := grpc.DialContext(dialCtx, fmt.Sprintf("%s:9000", serviceName), grpc.WithInsecure(), grpc.WithBlock())
