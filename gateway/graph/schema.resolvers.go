@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"github.com/bxcodec/faker/v3"
 	"github.com/cenkalti/backoff/v4"
 
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
@@ -85,12 +84,52 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string
 
 func (r *mutationResolver) StartPayment(ctx context.Context) (*model.PaymentStartResponse, error) {
 	var err error
+
+	userID, err := auth.Authenticated(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	var paymentURL string
+
+	// Get cart
+	cart, err := r.CartService.CartContent(ctx, &cart_grpc.CartContentRequest{UserId: userID})
+	if err != nil {
+		return nil, err
+	}
+
+	// Create and get reference id and payment total
+	var cartItems []*orders_grpc.CartItem
+
+	for _, item := range cart.GetCartItems() {
+		cartItems = append(cartItems, &orders_grpc.CartItem{
+			Id:          item.GetId(),
+			ProductId:   item.GetProductId(),
+			Title:       item.GetTitle(),
+			Description: item.GetDescription(),
+			Price:       item.GetPrice(),
+			Image:       item.GetImage(),
+		})
+	}
+
+	if len(cartItems) == 0 {
+		return nil, errors.New("cart is empty")
+	}
+
+	paymentReq := &orders_grpc.StartOrderRequest{
+		UserId:    userID,
+		CartItems: cartItems,
+	}
+
+	res, err := r.OrdersService.StartOrder(ctx, paymentReq)
+	if err != nil {
+		return nil, err
+	}
 
 	operation := func() error {
 		paymentURL, err = createPaymentIntent(ctx, r.PaymentProviderURL, paymentIntentRequest{
-			Amount:      42.74,
-			ReferenceID: faker.UUIDHyphenated(),
+			Amount:      float64(res.GetPaymentAmount()),
+			ReferenceID: res.GetId(),
 			HookURL:     r.HookURL,
 			SuccessURL:  r.SuccessURL,
 			FailureURL:  r.FailureURL,
@@ -98,6 +137,7 @@ func (r *mutationResolver) StartPayment(ctx context.Context) (*model.PaymentStar
 
 		return err
 	}
+
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 5))
 	if err != nil {
 		return nil, err
