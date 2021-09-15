@@ -38,9 +38,14 @@ func main() {
 		clientBaseURL = "http://localhost:3000"
 	}
 
+	hookURL := os.Getenv("HOOK_URL")
+	if hookURL == "" {
+		hookURL = "http://localhost:4035"
+	}
+
 	paymentProviderBaseURL := os.Getenv("PAYMENT_PROVIDER_BASE_URL")
 	if paymentProviderBaseURL == "" {
-		paymentProviderBaseURL = "http://localhost:5055/payments/create-payment-intent"
+		paymentProviderBaseURL = "https://payments.store.yapas.in/payments/create-payment-intent"
 	}
 
 	var authClient auth_grpc.AuthServiceClient
@@ -97,9 +102,9 @@ func main() {
 		OrdersService:   orderClient,
 
 		PaymentProviderURL: paymentProviderBaseURL,
-		FailureURL:         fmt.Sprintf("%s/cart/payment-failed", clientBaseURL),
-		SuccessURL:         fmt.Sprintf("%s/cart/payment-successful", clientBaseURL),
-		HookURL:            fmt.Sprintf("%s/api/payment/webhooks", baseURL),
+		FailureURL:         fmt.Sprintf("%s/payment_failed", clientBaseURL),
+		SuccessURL:         fmt.Sprintf("%s/payment_successful", clientBaseURL),
+		HookURL:            hookURL,
 	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver}))
@@ -113,10 +118,6 @@ func main() {
 
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", srv)
-
-	r.Post("/api/payment/webhooks", func(writer http.ResponseWriter, request *http.Request) {
-		writer.WriteHeader(http.StatusOK)
-	})
 
 	log.Printf("Server is up and running on port %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
