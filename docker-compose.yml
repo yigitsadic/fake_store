@@ -37,3 +37,11 @@ services:
       - "3000:80"
     depends_on:
       - gateway
+  hook:
+    build:
+      context: .
+      dockerfile: ./hook/Dockerfile
+    ports:
+      - "4035:4035"
+  redis:
+    image: redis:alpine3.13
