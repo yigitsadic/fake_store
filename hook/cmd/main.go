@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +14,7 @@ type paymentStatus int
 
 const (
 	_ paymentStatus = iota
-	_
+	paymentPending
 	paymentCompleted
 )
 
@@ -47,35 +45,7 @@ func main() {
 
 	r := chi.NewRouter()
 
-	r.Post("/api/payment/webhooks", func(writer http.ResponseWriter, request *http.Request) {
-		var message paymentIntentMessage
-		b, err := io.ReadAll(request.Body)
-		defer request.Body.Close()
-
-		if err != nil {
-			writer.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
-
-		err = json.Unmarshal(b, &message)
-		if err != nil {
-			writer.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
-
-		if message.Status != paymentCompleted {
-			writer.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
-
-		err = rdb.Publish(request.Context(), "PAYMENTS_COMPLETE_CHANNEL", string(b)).Err()
-		if err != nil {
-			writer.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
-
-		writer.WriteHeader(http.StatusOK)
-	})
+	r.Post("/api/payment/webhooks", hookHandler(rdb))
 
 	log.Printf("Server is up and running on port %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
