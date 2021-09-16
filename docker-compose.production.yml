@@ -13,6 +13,12 @@ services:
       - "CLIENT_BASE_URL=https://store.yapas.in"
       - "PAYMENT_PROVIDER_BASE_URL=https://payments.store.yapas.in/payments/create-payment-intent"
       - "HOOK_URL=https://payments.hook.store.yapas.in/api/payment/webhooks"
+    deploy:
+      restart_policy:
+        max_attempts: 10
+        condition: on-failure
+        delay: 5s
+        window: 120s
   payment_provider:
     image: yigitsadic/fake_store_payment_provider
     labels:
@@ -29,14 +35,32 @@ services:
       - "traefik.http.routers.hook.rule=Host(`payments.hook.store.yapas.in`)"
       - "traefik.http.routers.hook.entrypoints=websecure"
       - "traefik.http.routers.hook.tls.certresolver=myresolver"
+    deploy:
+      restart_policy:
+        max_attempts: 10
+        condition: on-failure
+        delay: 5s
+        window: 120s
   auth:
     image: yigitsadic/fake_store_auth
   products:
     image: yigitsadic/fake_store_products
   cart:
     image: yigitsadic/fake_store_cart
+    deploy:
+      restart_policy:
+        max_attempts: 10
+        condition: on-failure
+        delay: 5s
+        window: 120s
   orders:
     image: yigitsadic/fake_store_orders
+    deploy:
+      restart_policy:
+        max_attempts: 10
+        condition: on-failure
+        delay: 5s
+        window: 120s
   client:
     image: yigitsadic/fake_store_client
     labels:
