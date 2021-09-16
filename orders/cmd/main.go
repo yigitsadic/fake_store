@@ -24,11 +24,11 @@ func main() {
 		DB:       0,
 	})
 
-	if err := rdb.Ping(context.Background()).Err(); err != nil {
+	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatalln("Unable to connect redis")
 	}
 
-	orderDatabase = newSeededDatabase()
+	orderDatabase = newDatabase()
 
 	listener := eventListener{
 		RedisClient: rdb,

@@ -37,18 +37,18 @@ func (l *eventListener) ListenPaymentCompleteEvents() {
 		if err == nil {
 			record, ok := l.Database[paymentMessage.ReferenceID]
 			if ok {
-				newRecord := orders_grpc.Order{
-					Id:            record.GetId(),
-					UserId:        record.GetUserId(),
-					PaymentAmount: record.GetPaymentAmount(),
-					CreatedAt:     record.GetCreatedAt(),
-					Products:      record.GetProducts(),
+				newRecord := Order{
+					ID:            record.ID,
+					UserID:        record.UserID,
+					PaymentAmount: record.PaymentAmount,
+					CreatedAt:     record.CreatedAt,
+					Products:      record.Products,
 					Status:        orders_grpc.Order_COMPLETED,
 				}
 
-				l.Database[paymentMessage.ReferenceID] = &newRecord
+				l.Database[paymentMessage.ReferenceID] = newRecord
 
-				b, err := json.Marshal(flushCartMessage{UserID: newRecord.GetUserId()})
+				b, err := json.Marshal(flushCartMessage{UserID: newRecord.UserID})
 				if err == nil {
 					l.RedisClient.Publish(l.Ctx, "FLUSH_CART_CHANNEL", string(b))
 				}
