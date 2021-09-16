@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type paymentStatus int
 
@@ -21,6 +24,10 @@ type paymentIntent struct {
 	SuccessURL string
 	FailureURL string
 	HookURL    string
+}
+
+func (i paymentIntent) AmountDisplay() string {
+	return fmt.Sprintf("%.2f", i.Amount)
 }
 
 var database = make(map[string]paymentIntent)
