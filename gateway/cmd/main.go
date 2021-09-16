@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
@@ -116,6 +117,7 @@ func main() {
 	// Parses JWT token in the Authorization key in header and stores it to context with key *userId*
 	r.Use(auth.Middleware)
 
+	r.Use(middleware.Heartbeat("/readiness"))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", srv)
 
