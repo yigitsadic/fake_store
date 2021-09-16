@@ -26,7 +26,6 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(cors.AllowAll().Handler)
-
 	r.Use(middleware.Heartbeat("/readiness"))
 
 	tmpl := template.Must(template.ParseFiles("./templates/index.html"))
