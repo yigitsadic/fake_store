@@ -56,9 +56,7 @@ func main() {
 
 	authConnection, err := acquireConnection("auth")
 	if err != nil {
-		authConnection = nil
-
-		log.Println("Cannot obtain auth service connection")
+		log.Fatalf("cannot obtain auth service connection")
 	} else {
 		authClient = auth_grpc.NewAuthServiceClient(authConnection)
 		defer authConnection.Close()
@@ -66,9 +64,7 @@ func main() {
 
 	productsConnection, err := acquireConnection("products")
 	if err != nil {
-		productClient = nil
-
-		log.Println("Cannot obtain product service connection")
+		log.Fatalf("cannot obtain products service connection")
 	} else {
 		productClient = product_grpc.NewProductServiceClient(productsConnection)
 
@@ -77,9 +73,7 @@ func main() {
 
 	cartConnection, err := acquireConnection("cart")
 	if err != nil {
-		cartClient = nil
-
-		log.Println("Cannot obtain product service connection")
+		log.Fatalf("cannot obtain cart service connection")
 	} else {
 		cartClient = cart_grpc.NewCartServiceClient(cartConnection)
 
@@ -88,9 +82,7 @@ func main() {
 
 	ordersConnection, err := acquireConnection("orders")
 	if err != nil {
-		orderClient = nil
-
-		log.Println("Cannot obtain auth service connection")
+		log.Fatalf("cannot obtain orders service connection")
 	} else {
 		orderClient = orders_grpc.NewOrdersServiceClient(ordersConnection)
 		defer authConnection.Close()
