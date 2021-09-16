@@ -87,6 +87,7 @@ func handleCompletePaymentIntent(writer http.ResponseWriter, request *http.Reque
 			ReferenceID: record.ReferenceID,
 			Status:      paymentCompleted,
 			CreatedAt:   record.CreatedAt,
+			HookURL:     record.HookURL,
 			SuccessURL:  record.SuccessURL,
 			FailureURL:  record.FailureURL,
 		}
