@@ -81,17 +81,6 @@ func handleCompletePaymentIntent(writer http.ResponseWriter, request *http.Reque
 	targetURL := record.FailureURL
 
 	if ok {
-		operation := func() error {
-			return sendPaymentRequestToHookURL(record)
-		}
-
-		// send successful payment hook
-		err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 5))
-		if err != nil {
-			http.Redirect(writer, request, targetURL, http.StatusFound)
-			return
-		}
-
 		newRecord := paymentIntent{
 			ID:          record.ID,
 			Amount:      record.Amount,
@@ -100,6 +89,17 @@ func handleCompletePaymentIntent(writer http.ResponseWriter, request *http.Reque
 			CreatedAt:   record.CreatedAt,
 			SuccessURL:  record.SuccessURL,
 			FailureURL:  record.FailureURL,
+		}
+
+		operation := func() error {
+			return sendPaymentRequestToHookURL(newRecord)
+		}
+
+		// send successful payment hook
+		err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 5))
+		if err != nil {
+			http.Redirect(writer, request, targetURL, http.StatusFound)
+			return
 		}
 
 		database[newRecord.ID] = newRecord
