@@ -11,7 +11,7 @@ type claims struct {
 	jwt.StandardClaims
 }
 
-func generateJWTToken(id, avatar, fullName string) string {
+func generateJWTToken(secret, id, avatar, fullName string) string {
 	c := claims{
 		Avatar:   avatar,
 		FullName: fullName,
@@ -22,7 +22,7 @@ func generateJWTToken(id, avatar, fullName string) string {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	ss, _ := token.SignedString([]byte("FAKE_STORE_AUTH"))
+	ss, _ := token.SignedString([]byte(secret))
 
 	return ss
 }

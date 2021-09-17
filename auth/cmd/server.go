@@ -11,6 +11,8 @@ const diceBearURL = "https://avatars.dicebear.com/api/human/%s.svg"
 
 type server struct {
 	auth_grpc.UnimplementedAuthServiceServer
+
+	JWTTokenSecret string
 }
 
 func (s *server) LoginUser(context.Context, *auth_grpc.AuthRequest) (*auth_grpc.UserResponse, error) {
@@ -19,7 +21,7 @@ func (s *server) LoginUser(context.Context, *auth_grpc.AuthRequest) (*auth_grpc.
 		Avatar:   fmt.Sprintf(diceBearURL, faker.UUIDDigit()),
 		FullName: faker.FirstName() + " " + faker.LastName(),
 	}
-	resp.JwtToken = generateJWTToken(resp.Id, resp.Avatar, resp.FullName)
+	resp.JwtToken = generateJWTToken(s.JWTTokenSecret, resp.Id, resp.Avatar, resp.FullName)
 
 	return &resp, nil
 }
