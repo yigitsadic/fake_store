@@ -11,12 +11,17 @@ type paymentStatus int
 
 const (
 	_ paymentStatus = iota
+
+	// PaymentInitialized means process started. It's default state.
 	PaymentInitialized
+
+	// PaymentCompleted means process completed.
 	PaymentCompleted
 )
 
 var errorRecordNotFound = errors.New("record not found on database")
 
+// PaymentHookMessage contains information that will send to hook.
 type PaymentHookMessage struct {
 	ID          string    `json:"id"`
 	Amount      float64   `json:"amount"`
@@ -25,6 +30,7 @@ type PaymentHookMessage struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+// PaymentIntent represents payments both completed and started.
 type PaymentIntent struct {
 	ID          string
 	Amount      float64
@@ -38,6 +44,7 @@ type PaymentIntent struct {
 	HookURL    string
 }
 
+// CreateHookMessage creates PaymentHookMessage from intent.
 func (i PaymentIntent) CreateHookMessage() PaymentHookMessage {
 	return PaymentHookMessage{
 		ID:          i.ID,
@@ -48,20 +55,24 @@ func (i PaymentIntent) CreateHookMessage() PaymentHookMessage {
 	}
 }
 
+// AmountDisplay displays float as two decimal string.
 func (i PaymentIntent) AmountDisplay() string {
 	return fmt.Sprintf("%.2f", i.Amount)
 }
 
+// Repository is an interface for interacting between application and database.
 type Repository interface {
 	Create(referenceID, hookURL, successURL, failureURL string, amount float64) (*PaymentIntent, error)
 	FindOne(ID string) (*PaymentIntent, error)
 	MarkAsCompleted(ID string) error
 }
 
+// PaymentIntentRepository is in-memory, database mimicking struct.
 type PaymentIntentRepository struct {
 	Storage map[string]*PaymentIntent
 }
 
+// Create inserts new intent to in-memory database with given parameters.
 func (p *PaymentIntentRepository) Create(referenceID, hookURL, successURL, failureURL string, amount float64) (*PaymentIntent, error) {
 	record := PaymentIntent{
 		ID:          faker.UUIDHyphenated(),
@@ -77,6 +88,7 @@ func (p *PaymentIntentRepository) Create(referenceID, hookURL, successURL, failu
 	return &record, nil
 }
 
+// FindOne fetches record from in-memory database with given ID.
 func (p PaymentIntentRepository) FindOne(ID string) (*PaymentIntent, error) {
 	record, ok := p.Storage[ID]
 	if !ok {
@@ -86,6 +98,7 @@ func (p PaymentIntentRepository) FindOne(ID string) (*PaymentIntent, error) {
 	return record, nil
 }
 
+// MarkAsCompleted marks payment as complete for given ID.
 func (p *PaymentIntentRepository) MarkAsCompleted(ID string) error {
 	record, ok := p.Storage[ID]
 	if !ok {
