@@ -41,6 +41,7 @@ func makeRequest(req *http.Request) error {
 	return errors.New("server not returned with successful status code")
 }
 
+// SendHookRequest makes several requests to given hookURL address. After 5 try it fails.
 func SendHookRequest(hookURL string, payload database.PaymentHookMessage) error {
 	req, err := buildRequest(hookURL, payload)
 	if err != nil {
