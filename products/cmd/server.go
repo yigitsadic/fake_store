@@ -2,36 +2,31 @@ package main
 
 import (
 	"context"
-	"errors"
+	"github.com/yigitsadic/fake_store/products/database"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 )
 
 type server struct {
 	product_grpc.UnimplementedProductServiceServer
+
+	Repository database.Repository
 }
 
 func (s *server) ListProducts(context.Context, *product_grpc.ProductListRequest) (*product_grpc.ProductList, error) {
-	return &product_grpc.ProductList{Products: productDB}, nil
+	var products []*product_grpc.Product
+
+	for _, product := range s.Repository.FetchAll() {
+		products = append(products, product.ConvertToGRPC())
+	}
+
+	return &product_grpc.ProductList{Products: products}, nil
 }
 
 func (s *server) ProductDetail(ctx context.Context, req *product_grpc.ProductDetailRequest) (*product_grpc.Product, error) {
-	var found *product_grpc.Product
-
-	for _, item := range productDB {
-		if req.GetProductId() == item.GetId() {
-			found = &product_grpc.Product{
-				Id:          item.GetId(),
-				Title:       item.GetTitle(),
-				Description: item.GetDescription(),
-				Price:       item.GetPrice(),
-				Image:       item.GetImage(),
-			}
-		}
+	product, err := s.Repository.FetchOne(req.GetProductId())
+	if err != nil {
+		return nil, err
 	}
 
-	if found == nil {
-		return nil, errors.New("product not found on products database")
-	}
-
-	return found, nil
+	return product.ConvertToGRPC(), nil
 }
