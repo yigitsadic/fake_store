@@ -5,7 +5,7 @@ import {nanoid} from "nanoid";
 import EmptyOrderList from "./EmptyOrderList";
 
 const OrderList: React.FC = () => {
-    const {data, loading, error} = useListOrdersQuery();
+    const {data, loading, error} = useListOrdersQuery({ fetchPolicy: "network-only" });
 
     if (loading) return <h3>Loading...</h3>;
     if (error) return <h3>Error occurred during listing orders...</h3>;
