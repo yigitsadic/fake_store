@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Order struct represents order.
 type Order struct {
 	ID            string
 	UserID        string
@@ -15,6 +16,7 @@ type Order struct {
 	Products []Product
 }
 
+// ConvertToGRPCModel converts order to grpc compatible struct.
 func (o Order) ConvertToGRPCModel() *orders_grpc.Order {
 	var products []*orders_grpc.Product
 
@@ -32,6 +34,7 @@ func (o Order) ConvertToGRPCModel() *orders_grpc.Order {
 	}
 }
 
+// Product struct represents product.
 type Product struct {
 	ID          string
 	Title       string
@@ -40,6 +43,7 @@ type Product struct {
 	Price       float32
 }
 
+// ConvertToGRPCModel converts product to grpc compatible struct.
 func (p Product) ConvertToGRPCModel() *orders_grpc.Product {
 	return &orders_grpc.Product{
 		Id:          p.ID,

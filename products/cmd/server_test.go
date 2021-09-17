@@ -27,7 +27,7 @@ var (
 		Price:       54.25,
 	}
 
-	expectedError = errors.New("product not found")
+	errExpected = errors.New("product not found")
 )
 
 type mockProductRepo struct {
@@ -42,7 +42,7 @@ func (m mockProductRepo) FetchOne(s string) (*database.Product, error) {
 		return &testProduct, nil
 	}
 
-	return nil, expectedError
+	return nil, errExpected
 }
 
 func init() {
