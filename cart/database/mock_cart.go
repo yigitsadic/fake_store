@@ -6,8 +6,11 @@ import (
 )
 
 type MockCartRepository struct {
-	ErrorOnAdd bool
-	Storage    map[string]*Cart
+	ErrorOnAdd     bool
+	ErrorOnDisplay bool
+	ErrorOnDelete  bool
+
+	Storage map[string]*Cart
 }
 
 func (c *MockCartRepository) FlushCart(userID string) {
@@ -15,6 +18,10 @@ func (c *MockCartRepository) FlushCart(userID string) {
 }
 
 func (c *MockCartRepository) FindCart(userID string) (*Cart, error) {
+	if c.ErrorOnDisplay {
+		return nil, errors.New("not found")
+	}
+
 	r, ok := c.Storage[userID]
 	if ok {
 		return r, nil
@@ -53,6 +60,10 @@ func (c *MockCartRepository) AddToCart(item *CartItem) error {
 }
 
 func (c *MockCartRepository) RemoveFromCart(itemID, userID string) error {
+	if c.ErrorOnDelete {
+		return errors.New("unable to remove")
+	}
+
 	cart, ok := c.Storage[userID]
 	if !ok {
 		return errors.New("cart not present")
