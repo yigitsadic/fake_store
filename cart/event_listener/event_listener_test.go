@@ -40,7 +40,7 @@ func TestEventListener_ListenFlushCartEvents(t *testing.T) {
 
 	goodMessage = string(b)
 
-	t.Run("it should do nothing if error occurs during unmarshal", func(t *testing.T) {
+	t.Run("it should do nothing with bad message", func(t *testing.T) {
 		ch := make(chan *redis.Message)
 
 		listener := &EventListener{
