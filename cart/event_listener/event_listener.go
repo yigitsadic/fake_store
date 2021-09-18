@@ -1,23 +1,26 @@
-package main
+package event_listener
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
+	"github.com/yigitsadic/fake_store/cart/database"
 )
+
+const ChannelName = "FLUSH_CART_CHANNEL"
 
 type flushCartMessage struct {
 	UserID string `json:"user_id"`
 }
 
-type eventListener struct {
+type EventListener struct {
 	RedisClient *redis.Client
 	Ctx         context.Context
-	Database    *cartDatabase
+	Repository  database.Repository
 }
 
-func (l *eventListener) ListenFlushCartEvents() {
-	pubSub := l.RedisClient.Subscribe(l.Ctx, "FLUSH_CART_CHANNEL")
+func (l *EventListener) ListenFlushCartEvents() {
+	pubSub := l.RedisClient.Subscribe(l.Ctx, ChannelName)
 
 	ch := pubSub.Channel()
 
@@ -26,7 +29,7 @@ func (l *eventListener) ListenFlushCartEvents() {
 
 		err := json.Unmarshal([]byte(msg.Payload), &cartMessage)
 		if err == nil {
-			l.Database.Storage[cartMessage.UserID] = []cartItem{}
+			l.Repository.FlushCart(cartMessage.UserID)
 		}
 	}
 }
