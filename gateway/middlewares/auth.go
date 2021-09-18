@@ -1,4 +1,4 @@
-package auth
+package middlewares
 
 import (
 	"context"
@@ -9,11 +9,17 @@ import (
 
 type ctxKey string
 
-const userIDCtxKey = ctxKey("userID")
+const (
+	userIDCtxKey = ctxKey("userID")
+)
+
+var (
+	secret = []byte("FAKE_STORE_AUTH")
+)
 
 func parseUserIDFromJWT(givenToken string) string {
 	token, err := jwt.Parse(givenToken, func(tk *jwt.Token) (interface{}, error) {
-		return []byte("FAKE_STORE_AUTH"), nil
+		return secret, nil
 	})
 
 	if err == nil {
@@ -26,8 +32,8 @@ func parseUserIDFromJWT(givenToken string) string {
 	return ""
 }
 
-// Middleware chi http middleware for reading token in header['authorization']
-func Middleware(next http.Handler) http.Handler {
+// Auth chi http middleware for reading token in header['authorization']
+func Auth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 

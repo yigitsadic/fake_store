@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 	"github.com/cenkalti/backoff/v4"
+	"github.com/yigitsadic/fake_store/gateway/middlewares"
 
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
-	"github.com/yigitsadic/fake_store/gateway/auth"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
@@ -34,7 +34,7 @@ func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, err
 }
 
 func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*model.Cart, error) {
-	userID, err := auth.Authenticated(ctx)
+	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*mo
 }
 
 func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string) (*model.Cart, error) {
-	userID, err := auth.Authenticated(ctx)
+	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string
 func (r *mutationResolver) StartPayment(ctx context.Context) (*model.PaymentStartResponse, error) {
 	var err error
 
-	userID, err := auth.Authenticated(ctx)
+	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
-	userID, err := auth.Authenticated(ctx)
+	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
 }
 
 func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
-	userID, err := auth.Authenticated(ctx)
+	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
 		return nil, err
 	}

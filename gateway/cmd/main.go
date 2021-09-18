@@ -8,7 +8,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
-	"github.com/yigitsadic/fake_store/gateway/auth"
+	"github.com/yigitsadic/fake_store/gateway/middlewares"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
@@ -107,7 +107,7 @@ func main() {
 	r.Use(cors.AllowAll().Handler)
 
 	// Parses JWT token in the Authorization key in header and stores it to context with key *userId*
-	r.Use(auth.Middleware)
+	r.Use(middlewares.Auth)
 
 	r.Use(middleware.Heartbeat("/readiness"))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
