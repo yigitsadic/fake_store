@@ -1,8 +1,10 @@
-package main
+package handlers
 
 import (
 	"context"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yigitsadic/fake_store/products/database"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
@@ -49,7 +51,7 @@ func init() {
 	lis = bufconn.Listen(bufSize)
 	s := grpc.NewServer()
 
-	product_grpc.RegisterProductServiceServer(s, &server{
+	product_grpc.RegisterProductServiceServer(s, &Server{
 		Repository: &mockProductRepo{},
 	})
 	go func() {
@@ -67,33 +69,27 @@ func TestServer_ListProducts(t *testing.T) {
 	ctx := context.Background()
 
 	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
-	if err != nil {
-		t.Fatalf("unexpected to get connection error. Err=%s", err)
-	}
+	require.Nilf(t, err, "unexpected to get connection error. Err=%s", err)
 
 	defer conn.Close()
 
 	c := product_grpc.NewProductServiceClient(conn)
 
 	res, err := c.ListProducts(ctx, &product_grpc.ProductListRequest{})
-	if err != nil {
-		t.Errorf("unexpected to get an error for list products but got=%s", err)
-	}
+
+	assert.Nilf(t, err, "unexpected to get an error for list products but got=%s", err)
 
 	products := res.GetProducts()
 
-	if len(products) != 1 {
-		t.Errorf("expected count was %d but got %d", 1, len(products))
-	}
+	assert.Equalf(t, 1, len(products), "expected count was %d but got %d", 1, len(products))
 }
 
 func TestServer_ProductDetail(t *testing.T) {
 	ctx := context.Background()
 
 	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
-	if err != nil {
-		t.Fatalf("unexpected to get connection error. Err=%s", err)
-	}
+
+	require.Nilf(t, err, "unexpected to get connection error. Err=%s", err)
 
 	defer conn.Close()
 
@@ -102,27 +98,11 @@ func TestServer_ProductDetail(t *testing.T) {
 	res, err := c.ProductDetail(ctx, &product_grpc.ProductDetailRequest{
 		ProductId: testProduct.ID,
 	})
-	if err != nil {
-		t.Errorf("unexpected to get an error for product detail but got=%s", err)
-	}
 
-	if res.GetId() != testProduct.ID {
-		t.Errorf("expected product id was %s but got %s", testProduct.ID, res.GetId())
-	}
-
-	if res.GetTitle() != testProduct.Title {
-		t.Errorf("expected product title was %s but got %s", testProduct.Title, res.GetTitle())
-	}
-
-	if res.GetDescription() != testProduct.Description {
-		t.Errorf("expected product description was %s but got %s", testProduct.Description, res.GetDescription())
-	}
-
-	if res.GetImage() != testProduct.Image {
-		t.Errorf("expected product image was %s but got %s", testProduct.Image, res.GetImage())
-	}
-
-	if res.GetPrice() != testProduct.Price {
-		t.Errorf("expected product price was %f but got %f", testProduct.Price, res.GetPrice())
-	}
+	assert.Nilf(t, err, "unexpected to get an error for product detail but got=%s", err)
+	assert.Equalf(t, testProduct.ID, res.GetId(), "expected product id was %s but got %s", testProduct.ID, res.GetId())
+	assert.Equalf(t, testProduct.Title, res.GetTitle(), "expected product title was %s but got %s", testProduct.Title, res.GetTitle())
+	assert.Equalf(t, testProduct.Description, res.GetDescription(), "expected product description was %s but got %s", testProduct.Description, res.GetDescription())
+	assert.Equalf(t, testProduct.Image, res.GetImage(), "expected product image was %s but got %s", testProduct.Image, res.GetImage())
+	assert.Equalf(t, testProduct.Price, res.GetPrice(), "expected product price was %f but got %f", testProduct.Price, res.GetPrice())
 }
