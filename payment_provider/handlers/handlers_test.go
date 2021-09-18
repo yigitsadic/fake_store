@@ -1,10 +1,12 @@
-package main
+package handlers
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yigitsadic/fake_store/payment_provider/database"
 	"html/template"
 	"io"
@@ -69,9 +71,7 @@ func (m *mockGoodRepository) MarkAsCompleted(ID string) error {
 
 func TestServer_HandleShow(t *testing.T) {
 	tmp, err := template.New("index.html").Parse(`{{ .AmountDisplay }} EUR - {{ .ID }}`)
-	if err != nil {
-		t.Fatalf("unexpected to get an while parsing tempalte but got=%s", err)
-	}
+	require.Nil(t, err)
 
 	repo := initGoodRepositoryWith([]database.PaymentIntent{
 		{
@@ -89,7 +89,7 @@ func TestServer_HandleShow(t *testing.T) {
 	t.Run("it should return 404 if cannot find in database", func(t *testing.T) {
 		r := chi.NewRouter()
 
-		s := server{
+		s := Server{
 			ShowTemplate:            tmp,
 			PaymentIntentRepository: repo,
 		}
@@ -100,25 +100,19 @@ func TestServer_HandleShow(t *testing.T) {
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodGet, ts.URL+"/payments/abc", nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while sending GET request but got=%s", err)
-		}
 
-		if res.StatusCode != http.StatusNotFound {
-			t.Errorf("expected to get status not found but got=%d", res.StatusCode)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, http.StatusNotFound, res.StatusCode)
 	})
 
 	t.Run("it should return 200 if it founds in database", func(t *testing.T) {
 		r := chi.NewRouter()
 
-		s := server{
+		s := Server{
 			ShowTemplate:            tmp,
 			PaymentIntentRepository: repo,
 			SendHookRequest:         nil,
@@ -130,19 +124,13 @@ func TestServer_HandleShow(t *testing.T) {
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodGet, ts.URL+"/payments/abcdef", nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while sending GET request but got=%s", err)
-		}
 
-		if res.StatusCode != http.StatusOK {
-			t.Errorf("expected to get status ok response but got=%d", res.StatusCode)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, http.StatusOK, res.StatusCode)
 	})
 }
 
@@ -159,7 +147,7 @@ func TestServer_HandleCreate(t *testing.T) {
 	t.Run("it should return 422 for empty body", func(t *testing.T) {
 		r := chi.NewRouter()
 
-		s := server{
+		s := Server{
 			PaymentIntentRepository: repo,
 		}
 
@@ -169,25 +157,19 @@ func TestServer_HandleCreate(t *testing.T) {
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL, nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while sending create intent request but got=%s", err)
-		}
 
-		if res.StatusCode != http.StatusUnprocessableEntity {
-			t.Errorf("expected status code was=%d but got=%d", http.StatusUnprocessableEntity, res.StatusCode)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	})
 
 	t.Run("it should return 422 if it cannot save into database", func(t *testing.T) {
 		r := chi.NewRouter()
 		badRepo := mockBadRepository{}
-		s := server{PaymentIntentRepository: badRepo}
+		s := Server{PaymentIntentRepository: badRepo}
 
 		r.Post("/", s.HandleCreate())
 
@@ -195,29 +177,21 @@ func TestServer_HandleCreate(t *testing.T) {
 		defer ts.Close()
 
 		b, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatal("unexpected to get an error while marshaling struct to json")
-		}
+		require.Nil(t, err)
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL, bytes.NewBuffer(b))
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while sending create intent request but got=%s", err)
-		}
 
-		if res.StatusCode != http.StatusUnprocessableEntity {
-			t.Errorf("expected status code was=%d but got=%d", http.StatusUnprocessableEntity, res.StatusCode)
-		}
+		assert.Nil(t, err)
+		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	})
 
 	t.Run("it should return 200 if it is successful", func(t *testing.T) {
 		r := chi.NewRouter()
-		s := server{PaymentIntentRepository: repo, BaseURL: "https://google.com"}
+		s := Server{PaymentIntentRepository: repo, BaseURL: "https://google.com"}
 
 		r.Post("/", s.HandleCreate())
 
@@ -225,47 +199,27 @@ func TestServer_HandleCreate(t *testing.T) {
 		defer ts.Close()
 
 		b, err := json.Marshal(payload)
-		if err != nil {
-			t.Fatal("unexpected to get an error while marshaling struct to json")
-		}
+		require.Nil(t, err)
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL, bytes.NewBuffer(b))
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while sending create intent request but got=%s", err)
-		}
 
-		if res.StatusCode != http.StatusOK {
-			t.Errorf("expected status code was=%d but got=%d", http.StatusUnprocessableEntity, res.StatusCode)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, http.StatusOK, res.StatusCode)
 
 		data, err := io.ReadAll(res.Body)
 		defer res.Body.Close()
 
-		if err != nil {
-			t.Fatalf("error occurred during reading request body. err=%s", err)
-		}
+		require.Nil(t, err)
 
 		var response createPaymentIntentResponse
 
-		if err = json.Unmarshal(data, &response); err != nil {
-			t.Fatalf("error occurred during unmarshaling json into struct. err=%s", err)
-		}
-
-		if response.ID != "MOCK_ID" {
-			t.Errorf("expected to see MOCK_ID id at response but got=%s", response.ID)
-		}
-
-		expectedPaymentURL := "https://google.com/payments/" + response.ID
-
-		if response.PaymentURL != expectedPaymentURL {
-			t.Errorf("expected to get correct payment URL=%q but got=%q", expectedPaymentURL, response.PaymentURL)
-		}
+		require.Nil(t, json.Unmarshal(data, &response))
+		assert.Equal(t, "MOCK_ID", response.ID)
+		assert.Equal(t, "https://google.com/payments/"+response.ID, response.PaymentURL)
 	})
 }
 
@@ -295,33 +249,27 @@ func TestServer_HandleComplete(t *testing.T) {
 
 	t.Run("it should respond with not found if it's absent", func(t *testing.T) {
 		r := chi.NewRouter()
-		s := server{PaymentIntentRepository: repo}
+		s := Server{PaymentIntentRepository: repo}
 		r.Post("/{paymentIntentID}", s.HandleComplete())
 
 		ts := httptest.NewServer(r)
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL+"/abc", nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while completing payment but got=%s", err)
-		}
 
-		if res.StatusCode != http.StatusNotFound {
-			t.Errorf("expected to get 404 response but got=%d", res.StatusCode)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, http.StatusNotFound, res.StatusCode)
 	})
 
 	t.Run("it should redirect to success even it's completed before", func(t *testing.T) {
 		var callCounter int
 
 		r := chi.NewRouter()
-		s := server{
+		s := Server{
 			PaymentIntentRepository: repo,
 			SendHookRequest: func(_ string, _ database.PaymentHookMessage) error {
 				callCounter++
@@ -334,25 +282,16 @@ func TestServer_HandleComplete(t *testing.T) {
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL+"/completed_example", nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		req.Header.Set("Accept", "")
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while completing payment but got=%s", err)
-		}
 
-		if callCounter != 0 {
-			t.Errorf("unexpected to see call counter incremented")
-		}
-
-		if res.Request.URL.Path != "/success" {
-			t.Errorf("expected to redirect %q but got=%q", "/success", res.Request.URL.Path)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, 0, callCounter)
+		assert.Equal(t, "/success", res.Request.URL.Path)
 	})
 
 	t.Run("it should redirect to failure page if it cannot push hook", func(t *testing.T) {
@@ -369,7 +308,7 @@ func TestServer_HandleComplete(t *testing.T) {
 		}}
 
 		r := chi.NewRouter()
-		s := server{
+		s := Server{
 			PaymentIntentRepository: rr,
 			SendHookRequest: func(_ string, mes database.PaymentHookMessage) error {
 				callCounter++
@@ -383,25 +322,16 @@ func TestServer_HandleComplete(t *testing.T) {
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL+"/abcdef", nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		req.Header.Set("Accept", "")
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while completing payment but got=%s", err)
-		}
 
-		if callCounter < 1 {
-			t.Errorf("expected to see call counter incremented")
-		}
-
-		if res.Request.URL.Path != "/failure" {
-			t.Errorf("expected to redirect %q but got=%q", "/failure", res.Request.URL.Path)
-		}
+		require.Nil(t, err)
+		assert.True(t, callCounter > 0)
+		assert.Equal(t, "/failure", res.Request.URL.Path)
 	})
 
 	t.Run("it should redirect to success page if everything goes smoothly", func(t *testing.T) {
@@ -419,7 +349,7 @@ func TestServer_HandleComplete(t *testing.T) {
 		}}
 
 		r := chi.NewRouter()
-		s := server{
+		s := Server{
 			PaymentIntentRepository: rr,
 			SendHookRequest: func(target string, mes database.PaymentHookMessage) error {
 				targetURL = target
@@ -434,28 +364,16 @@ func TestServer_HandleComplete(t *testing.T) {
 		defer ts.Close()
 
 		req, err := http.NewRequest(http.MethodPost, ts.URL+"/abcdef", nil)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while building request but got=%s", err)
-		}
+		require.Nil(t, err)
 
 		req.Header.Set("Accept", "")
 
 		client := http.Client{}
 		res, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("unexpected to get an error while completing payment but got=%s", err)
-		}
 
-		if callCounter != 1 {
-			t.Errorf("expected to see call counter incremented")
-		}
-
-		if targetURL != "/hook" {
-			t.Errorf("expected hook url not satisfied. expected=%q got=%q", "/hook", targetURL)
-		}
-
-		if res.Request.URL.Path != "/success" {
-			t.Errorf("expected to redirect %q but got=%q", "/success", res.Request.URL.Path)
-		}
+		require.Nil(t, err)
+		assert.Equal(t, 1, callCounter)
+		assert.Equal(t, "/hook", targetURL)
+		assert.Equal(t, "/success", res.Request.URL.Path)
 	})
 }
