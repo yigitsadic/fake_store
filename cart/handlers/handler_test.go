@@ -10,25 +10,12 @@ import (
 )
 
 func TestServer_AddToCart(t *testing.T) {
+	userID := "eeee"
+
 	t.Run("it should add if cart not exist", func(t *testing.T) {
-		mockRepo := &database.MockCartRepository{
-			Storage: make(map[string]*database.Cart),
-		}
-		s := &Server{
-			CartRepository: mockRepo,
-		}
-
-		userID := "eeee"
-
-		req := &cart_grpc.AddToCartRequest{
-			UserId:      userID,
-			ProductId:   "eee",
-			Title:       "eee",
-			Description: "eee",
-			Price:       52.23,
-			Image:       "ee",
-		}
-
+		mockRepo := initializeMockRepo(t, false)
+		s := &Server{CartRepository: mockRepo}
+		req := generateAddToCartRequest(t, userID)
 		res, err := s.AddToCart(context.TODO(), req)
 
 		require.Nil(t, err)
@@ -43,10 +30,7 @@ func TestServer_AddToCart(t *testing.T) {
 	})
 
 	t.Run("it should add if cart present", func(t *testing.T) {
-		mockRepo := &database.MockCartRepository{
-			Storage: make(map[string]*database.Cart),
-		}
-		userID := "myuser"
+		mockRepo := initializeMockRepo(t, false)
 
 		mockRepo.Storage[userID] = &database.Cart{
 			UserID: userID,
@@ -62,19 +46,9 @@ func TestServer_AddToCart(t *testing.T) {
 				},
 			},
 		}
-		s := &Server{
-			CartRepository: mockRepo,
-		}
 
-		req := &cart_grpc.AddToCartRequest{
-			UserId:      userID,
-			ProductId:   "eee",
-			Title:       "eee",
-			Description: "eee",
-			Price:       52.23,
-			Image:       "ee",
-		}
-
+		s := &Server{CartRepository: mockRepo}
+		req := generateAddToCartRequest(t, userID)
 		res, err := s.AddToCart(context.TODO(), req)
 
 		require.Nil(t, err)
@@ -82,26 +56,34 @@ func TestServer_AddToCart(t *testing.T) {
 	})
 
 	t.Run("it should return an error if something went wrong", func(t *testing.T) {
-		mockRepo := &database.MockCartRepository{
-			Storage:    make(map[string]*database.Cart),
-			ErrorOnAdd: true,
-		}
-		userID := "myuser"
-		s := &Server{
-			CartRepository: mockRepo,
-		}
-
-		req := &cart_grpc.AddToCartRequest{
-			UserId:      userID,
-			ProductId:   "eee",
-			Title:       "eee",
-			Description: "eee",
-			Price:       52.23,
-			Image:       "ee",
-		}
-
+		mockRepo := initializeMockRepo(t, true)
+		s := &Server{CartRepository: mockRepo}
+		req := generateAddToCartRequest(t, userID)
 		res, err := s.AddToCart(context.TODO(), req)
+
 		assert.NotNil(t, err)
 		assert.Nil(t, res)
 	})
+}
+
+func initializeMockRepo(t *testing.T, errorOnAdd bool) *database.MockCartRepository {
+	t.Helper()
+
+	return &database.MockCartRepository{
+		Storage:    make(map[string]*database.Cart),
+		ErrorOnAdd: errorOnAdd,
+	}
+}
+
+func generateAddToCartRequest(t *testing.T, userID string) *cart_grpc.AddToCartRequest {
+	t.Helper()
+
+	return &cart_grpc.AddToCartRequest{
+		UserId:      userID,
+		ProductId:   "eee",
+		Title:       "eee",
+		Description: "eee",
+		Price:       52.23,
+		Image:       "ee",
+	}
 }
