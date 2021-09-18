@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	errUnauthorized = errors.New("unauthorized to access this resource")
+	ErrUnauthorized = errors.New("unauthorized to access this resource")
 )
 
 // Authenticated Tries fetch userID from context parameter and convert it to string.
@@ -15,11 +15,11 @@ func Authenticated(ctx context.Context) (string, error) {
 
 	v, ok := userID.(string)
 	if !ok {
-		return "", errUnauthorized
+		return "", ErrUnauthorized
 	}
 
 	if v == "" {
-		return "", errUnauthorized
+		return "", ErrUnauthorized
 	}
 
 	return v, nil
