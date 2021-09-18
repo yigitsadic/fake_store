@@ -71,10 +71,11 @@ func main() {
 	grpcServer := grpc.NewServer()
 	s := handlers.Server{CartRepository: repo}
 
+	pubSub := rdb.Subscribe(context.Background(), event_listener.ChannelName)
+
 	events := event_listener.EventListener{
-		RedisClient: rdb,
-		Ctx:         context.Background(),
 		Repository:  repo,
+		MessageChan: pubSub.Channel(),
 	}
 
 	go events.ListenFlushCartEvents()
