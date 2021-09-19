@@ -11,6 +11,7 @@ import {login} from "./store/auth/auth";
 import OrdersContainer from "./components/orders/OrdersContainer";
 import PaymentFailed from "./components/cart/payment-failed/PaymentFailed";
 import PaymentSuccessful from "./components/cart/payment-successful/PaymentSuccessful";
+import ProductsRouteWrapper from "./components/products/ProductsRouteWrapper";
 
 
 const App: React.FC = () => {
@@ -37,7 +38,7 @@ const App: React.FC = () => {
             <div className="container-fluid">
                 <Switch>
                     <Route path="/products">
-                        <ProductsList />
+                        <ProductsRouteWrapper />
                     </Route>
 
                     <Route path="/orders">

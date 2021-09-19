@@ -81,7 +81,13 @@ export type Query = {
   __typename?: 'Query';
   cart: Cart;
   orders?: Maybe<Array<Order>>;
+  product: Product;
   products?: Maybe<Array<Product>>;
+};
+
+
+export type QueryProductArgs = {
+  ID: Scalars['ID'];
 };
 
 export type CartContentQueryVariables = Exact<{ [key: string]: never; }>;
@@ -117,6 +123,13 @@ export type AddItemToCartMutationVariables = Exact<{
 
 
 export type AddItemToCartMutation = { __typename?: 'Mutation', addToCart: { __typename?: 'Cart', itemsCount: number } };
+
+export type ProductDetailQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type ProductDetailQuery = { __typename?: 'Query', product: { __typename?: 'Product', id: string, title: string, description: string, price: number, image: string } };
 
 export type ListProductsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -339,6 +352,45 @@ export function useAddItemToCartMutation(baseOptions?: Apollo.MutationHookOption
 export type AddItemToCartMutationHookResult = ReturnType<typeof useAddItemToCartMutation>;
 export type AddItemToCartMutationResult = Apollo.MutationResult<AddItemToCartMutation>;
 export type AddItemToCartMutationOptions = Apollo.BaseMutationOptions<AddItemToCartMutation, AddItemToCartMutationVariables>;
+export const ProductDetailDocument = gql`
+    query productDetail($id: ID!) {
+  product(ID: $id) {
+    id
+    title
+    description
+    price
+    image
+  }
+}
+    `;
+
+/**
+ * __useProductDetailQuery__
+ *
+ * To run a query within a React component, call `useProductDetailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProductDetailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProductDetailQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useProductDetailQuery(baseOptions: Apollo.QueryHookOptions<ProductDetailQuery, ProductDetailQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProductDetailQuery, ProductDetailQueryVariables>(ProductDetailDocument, options);
+      }
+export function useProductDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProductDetailQuery, ProductDetailQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProductDetailQuery, ProductDetailQueryVariables>(ProductDetailDocument, options);
+        }
+export type ProductDetailQueryHookResult = ReturnType<typeof useProductDetailQuery>;
+export type ProductDetailLazyQueryHookResult = ReturnType<typeof useProductDetailLazyQuery>;
+export type ProductDetailQueryResult = Apollo.QueryResult<ProductDetailQuery, ProductDetailQueryVariables>;
 export const ListProductsDocument = gql`
     query listProducts {
   products {
