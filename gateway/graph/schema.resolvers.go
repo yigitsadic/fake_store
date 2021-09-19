@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"github.com/yigitsadic/fake_store/favourites/favourites_grpc/favourites_grpc"
+	"sync"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
@@ -203,36 +204,55 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product, error) {
-	p, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: id})
-	if err != nil {
-		return nil, err
-	}
+	var wait sync.WaitGroup
+	var inFavourite *bool
+	var errProductNotFound error
+	var product *model.Product
 
-	product := &model.Product{
-		ID:          p.GetId(),
-		Title:       p.GetTitle(),
-		Description: p.GetDescription(),
-		Price:       float64(p.GetPrice()),
-		Image:       p.GetImage(),
-	}
+	go func() {
+		wait.Add(1)
+		defer wait.Done()
+
+		p, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: id})
+		if err != nil {
+			errProductNotFound = err
+		} else {
+			product = &model.Product{
+				ID:          p.GetId(),
+				Title:       p.GetTitle(),
+				Description: p.GetDescription(),
+				Price:       float64(p.GetPrice()),
+				Image:       p.GetImage(),
+			}
+		}
+	}()
 
 	// if user logged in, we'll continue to add favourite
 	userID, _ := middlewares.Authenticated(ctx)
 
 	if userID != "" {
-		var inFavourite *bool
+		go func() {
+			wait.Add(1)
+			defer wait.Done()
 
-		res, err := r.FavouritesService.ProductInFavourite(ctx, &favourites_grpc.FavouritesRequest{
-			ProductID: id,
-			UserID:    userID,
-		})
-		if err != nil {
-			inFavourite = nil
-		} else {
-			*inFavourite = res.GetInFavourites()
-		}
+			res, err := r.FavouritesService.ProductInFavourite(ctx, &favourites_grpc.FavouritesRequest{
+				ProductID: id,
+				UserID:    userID,
+			})
+			if err != nil {
+				inFavourite = nil
+			} else {
+				*inFavourite = res.GetInFavourites()
+			}
 
-		product.InFavourites = inFavourite
+			product.InFavourites = inFavourite
+		}()
+	}
+
+	wait.Wait()
+
+	if errProductNotFound != nil {
+		return nil, errProductNotFound
 	}
 
 	return product, nil
