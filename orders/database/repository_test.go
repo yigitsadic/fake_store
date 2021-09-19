@@ -62,3 +62,38 @@ func TestOrder_ConvertToGRPCModel(t *testing.T) {
 	assert.Equal(t, o.UserID, got.GetUserId())
 	assert.Equal(t, len(o.Products), len(got.GetProducts()))
 }
+
+func TestOrderList_ConvertToGRPCModel(t *testing.T) {
+	var list OrderList
+
+	list = append(list, Order{
+		ID:            "eee",
+		UserID:        "qqq",
+		CreatedAt:     time.Now(),
+		PaymentAmount: 343,
+		Status:        2,
+		Products: []Product{
+			{
+				ID:          "54",
+				Title:       "1111",
+				Description: "eeee",
+				Image:       "eeee",
+				Price:       12.4,
+			},
+			{
+				ID:          "55",
+				Title:       "12312312",
+				Description: "35553",
+				Image:       "121231",
+				Price:       20.2,
+			},
+		},
+	})
+
+	got := list.ConvertToGRPCModel()
+
+	assert.Equal(t, 1, len(got))
+	assert.Equal(t, "eee", got[0].GetId())
+	assert.Equal(t, "qqq", got[0].GetUserId())
+	assert.Equal(t, 2, len(got[0].GetProducts()))
+}

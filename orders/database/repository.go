@@ -34,6 +34,18 @@ func (o Order) ConvertToGRPCModel() *orders_grpc.Order {
 	}
 }
 
+type OrderList []Order
+
+func (o OrderList) ConvertToGRPCModel() []*orders_grpc.Order {
+	var orders []*orders_grpc.Order
+
+	for _, order := range o {
+		orders = append(orders, order.ConvertToGRPCModel())
+	}
+
+	return orders
+}
+
 // Product struct represents product.
 type Product struct {
 	ID          string
@@ -54,18 +66,8 @@ func (p Product) ConvertToGRPCModel() *orders_grpc.Product {
 	}
 }
 
-// CartItem represents item in cart.
-type CartItem struct {
-	ID          string
-	ProductID   string
-	Title       string
-	Description string
-	Image       string
-	Price       float32
-}
-
 type Repository interface {
-	FindAll(userID string) ([]*Order, error)
-	StartOrder(userID string, cartItems []CartItem) (*Order, error)
+	FindAll(userID string) (OrderList, error)
+	StartOrder(userID string, products []Product) (*Order, error)
 	CompleteOrder(orderID string) error
 }
