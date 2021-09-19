@@ -85,7 +85,7 @@ func TestServer_CartContent(t *testing.T) {
 
 	t.Run("it should respond correctly even cart doesn't exists", func(t *testing.T) {
 		s := &Server{CartRepository: mockRepo}
-		req := genenrateCartContentRequest(t, "NOT_EXIST")
+		req := generateCartContentRequest(t, "NOT_EXIST")
 		res, err := s.CartContent(context.TODO(), req)
 
 		assert.Nil(t, err)
@@ -94,7 +94,7 @@ func TestServer_CartContent(t *testing.T) {
 
 	t.Run("it should respond correctly if cart exists", func(t *testing.T) {
 		s := &Server{CartRepository: mockRepo}
-		req := genenrateCartContentRequest(t, userID)
+		req := generateCartContentRequest(t, userID)
 		res, err := s.CartContent(context.TODO(), req)
 
 		assert.Nil(t, err)
@@ -104,11 +104,75 @@ func TestServer_CartContent(t *testing.T) {
 	t.Run("it should not return an error if something went wrong", func(t *testing.T) {
 		badRepo := initializeMockRepo(t, false, true, false)
 		s := &Server{CartRepository: badRepo}
-		req := genenrateCartContentRequest(t, userID)
+		req := generateCartContentRequest(t, userID)
 		res, err := s.CartContent(context.TODO(), req)
 
 		assert.Nil(t, err)
 		assert.Equal(t, int32(0), res.GetItemCount())
+	})
+}
+
+func TestServer_RemoveFromCart(t *testing.T) {
+	userID := "eeee"
+	cartItemID := "EWQAS"
+
+	mockRepo := initializeMockRepo(t, false, false, false)
+	mockRepo.Storage[userID] = &database.Cart{
+		UserID: userID,
+		Items: []*database.CartItem{
+			{
+				ID:          cartItemID,
+				ProductID:   "eeeee",
+				UserID:      userID,
+				Title:       "eeee",
+				Description: "eee",
+				Image:       "eee",
+				Price:       54.4,
+			},
+		},
+	}
+
+	t.Run("it should return cart if not item found", func(t *testing.T) {
+		s := &Server{CartRepository: mockRepo}
+		req := generateRemoveFromCartRequest(t, "XYZ", userID)
+		res, err := s.RemoveFromCart(context.TODO(), req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(res.GetCartItems()))
+	})
+
+	t.Run("it should return nil if everything went good", func(t *testing.T) {
+		s := &Server{CartRepository: mockRepo}
+		req := generateRemoveFromCartRequest(t, cartItemID, userID)
+		res, err := s.RemoveFromCart(context.TODO(), req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, int32(0), res.GetItemCount())
+		assert.Equal(t, 0, len(res.GetCartItems()))
+	})
+
+	t.Run("it should return an error if something went wrong", func(t *testing.T) {
+		badRepo := initializeMockRepo(t, false, false, true)
+		badRepo.Storage[userID] = &database.Cart{
+			UserID: userID,
+			Items: []*database.CartItem{
+				{
+					ID:          cartItemID,
+					ProductID:   "eeeee",
+					UserID:      userID,
+					Title:       "eeee",
+					Description: "eee",
+					Image:       "eee",
+					Price:       54.4,
+				},
+			},
+		}
+
+		s := &Server{CartRepository: badRepo}
+		req := generateRemoveFromCartRequest(t, cartItemID, userID)
+		res, err := s.RemoveFromCart(context.TODO(), req)
+		assert.Nil(t, res)
+		assert.NotNil(t, err)
 	})
 }
 
@@ -123,7 +187,7 @@ func initializeMockRepo(t *testing.T, errorOnAdd, errorOnDisplay, errorOnDelete 
 	}
 }
 
-func genenrateCartContentRequest(t *testing.T, userID string) *cart_grpc.CartContentRequest {
+func generateCartContentRequest(t *testing.T, userID string) *cart_grpc.CartContentRequest {
 	t.Helper()
 
 	return &cart_grpc.CartContentRequest{UserId: userID}
@@ -140,4 +204,10 @@ func generateAddToCartRequest(t *testing.T, userID string) *cart_grpc.AddToCartR
 		Price:       52.23,
 		Image:       "ee",
 	}
+}
+
+func generateRemoveFromCartRequest(t *testing.T, ID, userID string) *cart_grpc.RemoveFromCartRequest {
+	t.Helper()
+
+	return &cart_grpc.RemoveFromCartRequest{CartItemId: ID, UserId: userID}
 }
