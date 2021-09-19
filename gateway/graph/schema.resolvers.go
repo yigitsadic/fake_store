@@ -6,7 +6,9 @@ package graph
 import (
 	"context"
 	"errors"
-	backoff "github.com/cenkalti/backoff/v4"
+	"github.com/yigitsadic/fake_store/favourites/favourites_grpc/favourites_grpc"
+
+	"github.com/cenkalti/backoff/v4"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
@@ -145,6 +147,40 @@ func (r *mutationResolver) StartPayment(ctx context.Context) (*model.PaymentStar
 	return &model.PaymentStartResponse{URL: paymentURL}, nil
 }
 
+func (r *mutationResolver) AddToFavourites(ctx context.Context, productID string) (bool, error) {
+	userID, err := middlewares.Authenticated(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	res, err := r.FavouritesService.MarkFavourite(ctx, &favourites_grpc.FavouritesRequest{
+		ProductID: productID,
+		UserID:    userID,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return res.GetSuccess(), nil
+}
+
+func (r *mutationResolver) RemoveFromFavourites(ctx context.Context, productID string) (bool, error) {
+	userID, err := middlewares.Authenticated(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	res, err := r.FavouritesService.UnMarkFavourite(ctx, &favourites_grpc.FavouritesRequest{
+		ProductID: productID,
+		UserID:    userID,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return res.GetSuccess(), nil
+}
+
 func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) {
 	var products []*model.Product
 
@@ -172,13 +208,64 @@ func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product,
 		return nil, err
 	}
 
-	return &model.Product{
+	product := &model.Product{
 		ID:          p.GetId(),
 		Title:       p.GetTitle(),
 		Description: p.GetDescription(),
 		Price:       float64(p.GetPrice()),
 		Image:       p.GetImage(),
-	}, nil
+	}
+
+	// if user logged in, we'll continue to add favourite
+	userID, _ := middlewares.Authenticated(ctx)
+
+	if userID != "" {
+		var inFavourite *bool
+
+		res, err := r.FavouritesService.ProductInFavourite(ctx, &favourites_grpc.FavouritesRequest{
+			ProductID: id,
+			UserID:    userID,
+		})
+		if err != nil {
+			inFavourite = nil
+		} else {
+			*inFavourite = res.GetInFavourites()
+		}
+
+		product.InFavourites = inFavourite
+	}
+
+	return product, nil
+}
+
+func (r *queryResolver) FavouriteProducts(ctx context.Context) ([]*model.FavouriteProduct, error) {
+	userID, err := middlewares.Authenticated(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var products []*model.FavouriteProduct
+
+	result, err := r.FavouritesService.ListFavourites(ctx, &favourites_grpc.ListFavouritesRequest{UserID: userID})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range result.GetProducts() {
+		var title, image string
+
+		title = item.GetTitle()
+		image = item.GetImage()
+
+		products = append(products, &model.FavouriteProduct{
+			ID:        item.GetId(),
+			ProductID: item.GetProductID(),
+			Title:     &title,
+			Image:     &image,
+		})
+	}
+
+	return products, nil
 }
 
 func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
