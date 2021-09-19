@@ -45,13 +45,13 @@ func (o *OrderRepository) Start(userID string, products []Product) (*Order, erro
 	return order, nil
 }
 
-func (o *OrderRepository) Complete(orderID string) error {
+func (o *OrderRepository) Complete(orderID string) (string, error) {
 	order, ok := o.Storage[orderID]
 	if ok && order.Status != orders_grpc.Order_COMPLETED {
 		order.Status = orders_grpc.Order_COMPLETED
 
-		return nil
+		return order.UserID, nil
 	} else {
-		return errors.New("order not found on database")
+		return "", errors.New("order not found")
 	}
 }

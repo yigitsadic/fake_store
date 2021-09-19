@@ -57,17 +57,17 @@ func (o *MockOrderRepository) Start(userID string, products []Product) (*Order, 
 	return order, nil
 }
 
-func (o *MockOrderRepository) Complete(orderID string) error {
+func (o *MockOrderRepository) Complete(orderID string) (string, error) {
 	if o.ErrorOnComplete {
-		return errors.New("something went wrong")
+		return "", nil
 	}
 
 	order, ok := o.Storage[orderID]
 	if ok && order.Status != orders_grpc.Order_COMPLETED {
 		order.Status = orders_grpc.Order_COMPLETED
 
-		return nil
+		return "", nil
 	} else {
-		return errors.New("order not found on database")
+		return "", nil
 	}
 }

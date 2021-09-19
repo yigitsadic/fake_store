@@ -69,5 +69,5 @@ func (p Product) ConvertToGRPCModel() *orders_grpc.Product {
 type Repository interface {
 	FindAll(userID string) (OrderList, error)
 	Start(userID string, products []Product) (*Order, error)
-	Complete(orderID string) error
+	Complete(orderID string) (string, error)
 }

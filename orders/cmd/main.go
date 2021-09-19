@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/yigitsadic/fake_store/orders/database"
+	"github.com/yigitsadic/fake_store/orders/event_handlers"
+	"github.com/yigitsadic/fake_store/orders/handlers"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
-
-var orderDatabase database
 
 func main() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 9000))
@@ -28,18 +29,22 @@ func main() {
 		log.Fatalln("Unable to connect redis")
 	}
 
-	orderDatabase = newDatabase()
+	repo := &database.OrderRepository{}
 
-	listener := eventListener{
-		RedisClient: rdb,
-		Ctx:         context.Background(),
-		Database:    orderDatabase,
+	pubSub := rdb.Subscribe(context.Background(), event_handlers.PAYMENT_COMPLETE_CHANNEL)
+
+	eventHandler := event_handlers.EventHandler{
+		FlushCartFunc: func(message string) {
+			rdb.Publish(context.Background(), event_handlers.FLUSH_CART_CHANNEL, message)
+		},
+		MessageChan:     pubSub.Channel(),
+		OrderRepository: repo,
 	}
 
-	go listener.ListenPaymentCompleteEvents()
+	go eventHandler.ListenPaymentCompleteEvents()
 
 	grpcServer := grpc.NewServer()
-	s := server{Database: orderDatabase}
+	s := handlers.Server{OrderRepository: repo}
 
 	orders_grpc.RegisterOrdersServiceServer(grpcServer, &s)
 
