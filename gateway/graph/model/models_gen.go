@@ -16,6 +16,14 @@ type CartItem struct {
 	Image       string  `json:"image"`
 }
 
+type FavouriteProduct struct {
+	ID        string  `json:"id"`
+	ProductID string  `json:"productID"`
+	Status    int     `json:"status"`
+	Title     *string `json:"title"`
+	Image     *string `json:"image"`
+}
+
 type LoginResponse struct {
 	ID       string `json:"id"`
 	Avatar   string `json:"avatar"`
@@ -34,9 +42,10 @@ type PaymentStartResponse struct {
 }
 
 type Product struct {
-	ID          string  `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-	Image       string  `json:"image"`
+	ID           string  `json:"id"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	Price        float64 `json:"price"`
+	Image        string  `json:"image"`
+	InFavourites *bool   `json:"inFavourites"`
 }
