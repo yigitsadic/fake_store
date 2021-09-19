@@ -44,7 +44,7 @@ func main() {
 	orders_grpc.RegisterOrdersServiceServer(grpcServer, &s)
 
 	log.Println("Started to serve order grpc")
-	if err := grpcServer.Serve(lis); err != nil {
+	if err = grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve due to %s\n", err)
 	}
 }
