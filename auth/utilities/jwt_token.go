@@ -1,4 +1,4 @@
-package main
+package utilities
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -11,7 +11,7 @@ type claims struct {
 	jwt.StandardClaims
 }
 
-func generateJWTToken(secret, id, avatar, fullName string) string {
+func GenerateJWTToken(secret, id, avatar, fullName string) string {
 	c := claims{
 		Avatar:   avatar,
 		FullName: fullName,

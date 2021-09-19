@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/yigitsadic/fake_store/products/database"
+	"github.com/yigitsadic/fake_store/products/handlers"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"google.golang.org/grpc"
 	"log"
@@ -20,7 +21,7 @@ func main() {
 	database.SeedDatabase(repo)
 
 	grpcServer := grpc.NewServer()
-	s := server{
+	s := handlers.Server{
 		Repository: repo,
 	}
 

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+	"github.com/yigitsadic/fake_store/cart/database"
+	"github.com/yigitsadic/fake_store/cart/event_listener"
+	"github.com/yigitsadic/fake_store/cart/handlers"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -57,17 +60,22 @@ func main() {
 		DB:       0,
 	})
 
-	if err := rdb.Ping(context.Background()).Err(); err != nil {
+	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatalln("Unable to connect redis")
 	}
 
-	grpcServer := grpc.NewServer()
-	s := server{Database: newCartDatabase()}
+	repo := &database.CartRepository{
+		Storage: make(map[string]*database.Cart),
+	}
 
-	events := eventListener{
-		RedisClient: rdb,
-		Ctx:         context.Background(),
-		Database:    s.Database,
+	grpcServer := grpc.NewServer()
+	s := handlers.Server{CartRepository: repo}
+
+	pubSub := rdb.Subscribe(context.Background(), event_listener.ChannelName)
+
+	events := event_listener.EventListener{
+		Repository:  repo,
+		MessageChan: pubSub.Channel(),
 	}
 
 	go events.ListenFlushCartEvents()
@@ -75,7 +83,7 @@ func main() {
 	cart_grpc.RegisterCartServiceServer(grpcServer, &s)
 
 	log.Println("Started to serve cart grpc")
-	if err := grpcServer.Serve(lis); err != nil {
+	if err = grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve due to %s\n", err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/yigitsadic/fake_store/payment_provider/database"
+	"github.com/yigitsadic/fake_store/payment_provider/handlers"
 	"github.com/yigitsadic/fake_store/payment_provider/trigger"
 	"html/template"
 	"log"
@@ -32,7 +33,7 @@ func main() {
 		Storage: make(map[string]*database.PaymentIntent),
 	}
 
-	s := &server{
+	s := &handlers.Server{
 		BaseURL:                 baseURL,
 		ShowTemplate:            tmpl,
 		PaymentIntentRepository: &repo,

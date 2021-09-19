@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
+	"github.com/yigitsadic/fake_store/auth/handlers"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -15,7 +16,7 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	s := server{}
+	s := handlers.Server{}
 
 	auth_grpc.RegisterAuthServiceServer(grpcServer, &s)
 

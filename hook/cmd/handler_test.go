@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-redis/redis/v8"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -50,13 +51,9 @@ func Test_handleBookHandler(t *testing.T) {
 
 		req := buildBadRequest(ts.URL)
 		res, err := client.Do(req)
-		if err != nil {
-			t.Errorf("unexpected to get an error")
-		}
 
-		if res.StatusCode != http.StatusUnprocessableEntity {
-			t.Errorf("expected to get 422 response")
-		}
+		assert.Nil(t, err, "unexpected to get an error")
+		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode, "expected to get 422 response")
 	})
 
 	t.Run("it will return error for incomplete payment status", func(t *testing.T) {
@@ -70,13 +67,9 @@ func Test_handleBookHandler(t *testing.T) {
 
 		req := buildPendingPaymentStatusRequest(ts.URL)
 		res, err := client.Do(req)
-		if err != nil {
-			t.Errorf("unexpected to get an error")
-		}
 
-		if res.StatusCode != http.StatusUnprocessableEntity {
-			t.Errorf("expected to get 422 response")
-		}
+		assert.Nil(t, err, "unexpected to get an error")
+		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode, "expected to get 422 response")
 	})
 
 	t.Run("it will return error if it cannot publish message to redis", func(t *testing.T) {
@@ -90,17 +83,10 @@ func Test_handleBookHandler(t *testing.T) {
 
 		req := buildGoodRequest(ts.URL)
 		res, err := client.Do(req)
-		if err != nil {
-			t.Errorf("unexpected to get an error")
-		}
 
-		if c.CallTime != 1 {
-			t.Errorf("expected to called for once")
-		}
-
-		if res.StatusCode != http.StatusUnprocessableEntity {
-			t.Errorf("expected to get 422 response")
-		}
+		assert.Nil(t, err, "unexpected to get an error")
+		assert.Equal(t, 1, c.CallTime, "expected to called for once")
+		assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode, "expected to get 422 response")
 	})
 
 	t.Run("it will return status ok if everything went well", func(t *testing.T) {
@@ -114,21 +100,11 @@ func Test_handleBookHandler(t *testing.T) {
 
 		req := buildGoodRequest(ts.URL)
 		res, err := client.Do(req)
-		if err != nil {
-			t.Errorf("unexpected to get an error")
-		}
 
-		if c.CallTime != 1 {
-			t.Errorf("expected to get called for once")
-		}
-
-		if c.Channel != channelName {
-			t.Errorf("expected channel name was %s but got %s", channelName, c.Channel)
-		}
-
-		if res.StatusCode != http.StatusOK {
-			t.Errorf("expected to get 200 response")
-		}
+		assert.Nil(t, err, "unexpected to get an error")
+		assert.Equal(t, 1, c.CallTime, "expected to get called for once")
+		assert.Equalf(t, channelName, c.Channel, "expected channel name was %s but got %s", channelName, c.Channel)
+		assert.Equal(t, http.StatusOK, res.StatusCode, "expected to get 200 response")
 	})
 }
 

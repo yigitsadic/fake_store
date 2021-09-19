@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/yigitsadic/fake_store/payment_provider/database"
 	"html/template"
-	"log"
 	"net/http"
 )
 
@@ -14,7 +13,7 @@ const (
 	contentType = "application/json"
 )
 
-type server struct {
+type Server struct {
 	BaseURL                 string
 	ShowTemplate            *template.Template
 	PaymentIntentRepository database.Repository
@@ -35,7 +34,7 @@ type createPaymentIntentResponse struct {
 	PaymentURL string `json:"payment_url"`
 }
 
-func (s *server) HandleCreate() func(http.ResponseWriter, *http.Request) {
+func (s *Server) HandleCreate() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		b := createPaymentIntentRequest{}
 		err := json.NewDecoder(r.Body).Decode(&b)
@@ -68,7 +67,7 @@ func (s *server) HandleCreate() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func (s *server) HandleShow() func(http.ResponseWriter, *http.Request) {
+func (s *Server) HandleShow() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		paymentIntentID := chi.URLParam(r, "paymentIntentID")
 
@@ -86,10 +85,10 @@ func (s *server) HandleShow() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func (s *server) HandleComplete() func(http.ResponseWriter, *http.Request) {
+func (s *Server) HandleComplete() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		paymentIntentID := chi.URLParam(r, "paymentIntentID")
-		log.Println("aa")
+
 		intent, err := s.PaymentIntentRepository.FindOne(paymentIntentID)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)

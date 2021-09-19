@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -6,13 +6,13 @@ import (
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 )
 
-type server struct {
+type Server struct {
 	product_grpc.UnimplementedProductServiceServer
 
 	Repository database.Repository
 }
 
-func (s *server) ListProducts(context.Context, *product_grpc.ProductListRequest) (*product_grpc.ProductList, error) {
+func (s *Server) ListProducts(context.Context, *product_grpc.ProductListRequest) (*product_grpc.ProductList, error) {
 	var products []*product_grpc.Product
 
 	for _, product := range s.Repository.FetchAll() {
@@ -22,7 +22,7 @@ func (s *server) ListProducts(context.Context, *product_grpc.ProductListRequest)
 	return &product_grpc.ProductList{Products: products}, nil
 }
 
-func (s *server) ProductDetail(ctx context.Context, req *product_grpc.ProductDetailRequest) (*product_grpc.Product, error) {
+func (s *Server) ProductDetail(ctx context.Context, req *product_grpc.ProductDetailRequest) (*product_grpc.Product, error) {
 	product, err := s.Repository.FetchOne(req.GetProductId())
 	if err != nil {
 		return nil, err
