@@ -6,13 +6,12 @@ package graph
 import (
 	"context"
 	"errors"
-	"github.com/cenkalti/backoff/v4"
-	"github.com/yigitsadic/fake_store/gateway/middlewares"
-
+	backoff "github.com/cenkalti/backoff/v4"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
+	"github.com/yigitsadic/fake_store/gateway/middlewares"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 )
@@ -165,6 +164,21 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 	}
 
 	return products, nil
+}
+
+func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product, error) {
+	p, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: id})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Product{
+		ID:          p.GetId(),
+		Title:       p.GetTitle(),
+		Description: p.GetDescription(),
+		Price:       float64(p.GetPrice()),
+		Image:       p.GetImage(),
+	}, nil
 }
 
 func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
