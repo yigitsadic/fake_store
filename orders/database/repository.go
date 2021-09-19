@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
@@ -34,6 +34,18 @@ func (o Order) ConvertToGRPCModel() *orders_grpc.Order {
 	}
 }
 
+type OrderList []Order
+
+func (o OrderList) ConvertToGRPCModel() []*orders_grpc.Order {
+	var orders []*orders_grpc.Order
+
+	for _, order := range o {
+		orders = append(orders, order.ConvertToGRPCModel())
+	}
+
+	return orders
+}
+
 // Product struct represents product.
 type Product struct {
 	ID          string
@@ -54,18 +66,8 @@ func (p Product) ConvertToGRPCModel() *orders_grpc.Product {
 	}
 }
 
-func convertProductFromGRPCModel(cartItem *orders_grpc.CartItem) Product {
-	return Product{
-		ID:          cartItem.GetId(),
-		Title:       cartItem.GetTitle(),
-		Description: cartItem.GetDescription(),
-		Image:       cartItem.GetImage(),
-		Price:       cartItem.GetPrice(),
-	}
-}
-
-type database map[string]Order
-
-func newDatabase() database {
-	return make(database)
+type Repository interface {
+	FindAll(userID string) (OrderList, error)
+	Start(userID string, products []Product) (*Order, error)
+	Complete(orderID string) (string, error)
 }
