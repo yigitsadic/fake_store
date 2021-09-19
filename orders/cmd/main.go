@@ -29,7 +29,9 @@ func main() {
 		log.Fatalln("Unable to connect redis")
 	}
 
-	repo := &database.OrderRepository{}
+	repo := &database.OrderRepository{
+		Storage: make(map[string]*database.Order),
+	}
 
 	pubSub := rdb.Subscribe(context.Background(), event_handlers.PaymentCompleteChannel)
 
