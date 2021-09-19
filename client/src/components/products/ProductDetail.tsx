@@ -1,7 +1,5 @@
-import React, {useState} from "react";
-import {useAppSelector} from "../../store/hooks";
-import {selectedCurrentUser} from "../../store/auth/auth";
-import {useAddItemToCartMutation} from "../../generated/graphql";
+import React from "react";
+import {Link} from "react-router-dom";
 
 interface ProductDetailProps {
     product: {
@@ -14,22 +12,6 @@ interface ProductDetailProps {
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailProps) => {
-    const initialText = "Add to Cart";
-    const [buttonText, setButtonText] = useState(initialText);
-    const currentUser = useAppSelector(selectedCurrentUser);
-
-    const [addToCartFn, {loading}] = useAddItemToCartMutation();
-
-    const handleAddToCart = () => {
-        addToCartFn({
-            variables: {productId: product.id},
-        }).then(() => {
-            setButtonText("👍 Added...");
-        }).catch(() => {
-            setButtonText("Try again...");
-        });
-    }
-
     return <div className="col">
         <div className="card shadow-sm">
             <img src={product.image} alt={product.title} />
@@ -46,12 +28,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }: ProductDetailP
                         {product.price.toFixed(2)} EUR
                     </b>
 
-                    <button type="button"
-                            className="btn btn-sm btn-outline-success"
-                            disabled={loading || !currentUser.loggedIn}
-                            onClick={() => handleAddToCart()}>
-                        {buttonText}
-                    </button>
+                    <Link to={`/products/${product.id}`}>
+                        <button className="btn btn-outline-secondary">Details</button>
+                    </Link>
                 </div>
             </div>
         </div>
