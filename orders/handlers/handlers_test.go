@@ -58,17 +58,59 @@ func TestServer_ListOrders(t *testing.T) {
 }
 
 func TestServer_StartOrder(t *testing.T) {
+	mockRepo := &database.MockOrderRepository{Storage: map[string]*database.Order{}}
+
 	t.Run("it should start order successfully", func(t *testing.T) {
-		assert.False(t, true)
+		mockRepo.ErrorOnStart = false
+
+		s := &Server{OrderRepository: mockRepo}
+		req := generateStartRequest(t)
+		res, err := s.StartOrder(context.TODO(), req)
+
+		assert.Nil(t, err)
+		assert.Equal(t, float32(10.5), res.GetPaymentAmount())
+		assert.True(t, res.GetId() != "")
 	})
 
 	t.Run("it should return an error if something went wrong", func(t *testing.T) {
-		assert.False(t, true)
+		mockRepo.ErrorOnStart = true
+
+		s := &Server{OrderRepository: mockRepo}
+		req := generateStartRequest(t)
+		res, err := s.StartOrder(context.TODO(), req)
+
+		assert.NotNil(t, err)
+		assert.Nil(t, res)
 	})
 
 	t.Run("it should return an error if cart item is empty", func(t *testing.T) {
-		assert.False(t, true)
+		mockRepo.ErrorOnStart = false
+
+		s := &Server{OrderRepository: mockRepo}
+		req := &orders_grpc.StartOrderRequest{UserId: "555", CartItems: []*orders_grpc.CartItem{}}
+		res, err := s.StartOrder(context.TODO(), req)
+
+		assert.Nil(t, res)
+		assert.NotNil(t, err)
 	})
+}
+
+func generateStartRequest(t *testing.T) *orders_grpc.StartOrderRequest {
+	t.Helper()
+
+	return &orders_grpc.StartOrderRequest{
+		UserId: "userID",
+		CartItems: []*orders_grpc.CartItem{
+			{
+				Id:          "111",
+				ProductId:   "12323",
+				Title:       "321321",
+				Description: "213123",
+				Price:       10.5,
+				Image:       "4343",
+			},
+		},
+	}
 }
 
 func generateOrderListRequest(t *testing.T, userID string) *orders_grpc.OrderListRequest {

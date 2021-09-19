@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"github.com/yigitsadic/fake_store/orders/database"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 )
@@ -21,6 +22,10 @@ func (s *Server) ListOrders(_ context.Context, req *orders_grpc.OrderListRequest
 }
 
 func (s *Server) StartOrder(_ context.Context, req *orders_grpc.StartOrderRequest) (*orders_grpc.StartOrderResponse, error) {
+	if len(req.GetCartItems()) == 0 {
+		return nil, errors.New("cart should contain at least one product")
+	}
+
 	order, err := s.OrderRepository.Start(req.GetUserId(), convertGrpcCartItemsToProduct(req.GetCartItems()))
 	if err != nil {
 		return nil, err
