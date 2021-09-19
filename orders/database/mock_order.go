@@ -14,6 +14,8 @@ type MockOrderRepository struct {
 	ErrorOnComplete bool
 
 	Storage map[string]*Order
+
+	CompleteCallCounter int
 }
 
 func (o *MockOrderRepository) FindAll(userID string) (OrderList, error) {
@@ -59,15 +61,17 @@ func (o *MockOrderRepository) Start(userID string, products []Product) (*Order, 
 
 func (o *MockOrderRepository) Complete(orderID string) (string, error) {
 	if o.ErrorOnComplete {
-		return "", nil
+		return "", errors.New("unable to continue")
 	}
 
 	order, ok := o.Storage[orderID]
 	if ok && order.Status != orders_grpc.Order_COMPLETED {
+		o.CompleteCallCounter++
+
 		order.Status = orders_grpc.Order_COMPLETED
 
-		return "", nil
+		return order.UserID, nil
 	} else {
-		return "", nil
+		return "", errors.New("record not found")
 	}
 }

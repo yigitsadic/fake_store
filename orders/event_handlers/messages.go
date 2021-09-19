@@ -6,16 +6,12 @@ import (
 )
 
 const (
-	PAYMENT_COMPLETE_CHANNEL = "PAYMENTS_COMPLETE_CHANNEL"
-	FLUSH_CART_CHANNEL       = "FLUSH_CART_CHANNEL"
+	PaymentCompleteChannel = "PAYMENTS_COMPLETE_CHANNEL"
+	FlushCartChannel       = "FLUSH_CART_CHANNEL"
 )
 
 type paymentIntentMessage struct {
 	ReferenceID string `json:"reference_id"`
-}
-
-type flushCartMessage struct {
-	UserID string `json:"user_id"`
 }
 
 // unmarshalMessage parses reference id from given string.

@@ -31,11 +31,11 @@ func main() {
 
 	repo := &database.OrderRepository{}
 
-	pubSub := rdb.Subscribe(context.Background(), event_handlers.PAYMENT_COMPLETE_CHANNEL)
+	pubSub := rdb.Subscribe(context.Background(), event_handlers.PaymentCompleteChannel)
 
 	eventHandler := event_handlers.EventHandler{
 		FlushCartFunc: func(message string) {
-			rdb.Publish(context.Background(), event_handlers.FLUSH_CART_CHANNEL, message)
+			rdb.Publish(context.Background(), event_handlers.FlushCartChannel, message)
 		},
 		MessageChan:     pubSub.Channel(),
 		OrderRepository: repo,
