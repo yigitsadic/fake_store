@@ -4,11 +4,11 @@ import "github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 
 // Product is a struct for representing products.
 type Product struct {
-	ID          string
-	Title       string
-	Description string
-	Image       string
-	Price       float32
+	ID          string  `bson:"_id,omitempty"`
+	Title       string  `bson:"title,omitempty"`
+	Description string  `bson:"description,omitempty"`
+	Image       string  `bson:"image,omitempty"`
+	Price       float32 `bson:"price,omitempty"`
 }
 
 // ConvertToGRPC converts Product struct to gRPC compatible struct.

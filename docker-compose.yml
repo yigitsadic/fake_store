@@ -7,41 +7,50 @@ services:
       dockerfile: ./gateway/Dockerfile
     ports:
       - "3035:3035"
+    restart: on-failure
   payment_provider:
     build:
       context: .
       dockerfile: ./payment_provider/Dockerfile
     ports:
       - "5055:5055"
+    restart: on-failure
   auth:
     build:
       context: .
       dockerfile: ./auth/Dockerfile
+    restart: on-failure
   products:
     build:
       context: .
       dockerfile: ./products/Dockerfile
+    restart: on-failure
+    ports:
+      - "9000:9000"
   orders:
     build:
       context: .
       dockerfile: ./orders/Dockerfile
+    restart: on-failure
   cart:
     build:
       context: .
       dockerfile: ./cart/Dockerfile
-  client:
+    restart: on-failure
+  favourites:
     build:
       context: .
-      dockerfile: ./client/Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - gateway
+      dockerfile: ./favourites/Dockerfile
+    restart: on-failure
   hook:
     build:
       context: .
       dockerfile: ./hook/Dockerfile
     ports:
       - "4035:4035"
+    restart: on-failure
   redis:
     image: redis:alpine3.13
+  database:
+    image: mongo:4.2.16
+    restart: always

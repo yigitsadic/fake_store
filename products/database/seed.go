@@ -1,7 +1,7 @@
 package database
 
 // SeedDatabase seeds database with placeholder product records.
-func SeedDatabase(repo *ProductRepository) {
+func SeedDatabase() []Product {
 	products := []Product{
 		{
 			ID:          "825c2ca8-cfeb-4ba4-8b34-fb93f7958fa8",
@@ -110,7 +110,5 @@ func SeedDatabase(repo *ProductRepository) {
 		},
 	}
 
-	for _, product := range products {
-		repo.Storage[product.ID] = product
-	}
+	return products
 }
