@@ -30,7 +30,7 @@ func TestEventHandler_ListenProductPopulateMessages(t *testing.T) {
 		h := EventHandler{
 			MessageChan:       ch,
 			ProductRepository: repo,
-			PopulateCartItemFunc: func(product database.Product) {
+			PopulateCartItemFunc: func(CartItemProductMessage) {
 				callCounter++
 			},
 		}
@@ -53,7 +53,7 @@ func TestEventHandler_ListenProductPopulateMessages(t *testing.T) {
 		h := EventHandler{
 			MessageChan:       ch,
 			ProductRepository: repo,
-			PopulateCartItemFunc: func(product database.Product) {
+			PopulateCartItemFunc: func(CartItemProductMessage) {
 				callCounter++
 			},
 		}
@@ -85,7 +85,7 @@ func TestEventHandler_ListenProductPopulateMessages(t *testing.T) {
 		h := EventHandler{
 			MessageChan:       ch,
 			ProductRepository: repo,
-			PopulateCartItemFunc: func(product database.Product) {
+			PopulateCartItemFunc: func(CartItemProductMessage) {
 				callCounter++
 			},
 		}

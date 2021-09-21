@@ -11,7 +11,7 @@ const (
 )
 
 type EventHandler struct {
-	PopulateCartItemFunc func(product database.Product)
+	PopulateCartItemFunc func(CartItemProductMessage)
 	MessageChan          <-chan *redis.Message
 	ProductRepository    database.Repository
 }
@@ -29,7 +29,14 @@ func (h *EventHandler) ListenProductPopulateMessages() {
 				continue
 			}
 
-			h.PopulateCartItemFunc(*product)
+			h.PopulateCartItemFunc(CartItemProductMessage{
+				ProductID:   product.ID,
+				CartItemID:  message.CartItemID,
+				Title:       product.Title,
+				Description: product.Description,
+				Image:       product.Image,
+				Price:       product.Price,
+			})
 		}
 	}
 }

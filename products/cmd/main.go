@@ -51,8 +51,8 @@ func main() {
 
 	pubSub := rdb.Subscribe(context.Background(), event_handlers.ProductInfoPopulateChannel)
 	eventHandler := event_handlers.EventHandler{
-		PopulateCartItemFunc: func(product database.Product) {
-			b, err := json.Marshal(product)
+		PopulateCartItemFunc: func(message event_handlers.CartItemProductMessage) {
+			b, err := json.Marshal(message)
 			if err != nil {
 				return
 			}
