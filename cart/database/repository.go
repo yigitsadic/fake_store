@@ -1,10 +1,14 @@
 package database
 
-import "github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+import (
+	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+)
 
 type Cart struct {
-	UserID string
-	Items  []*CartItem
+	ID     string     `bson:"_id,omitempty"`
+	UserID string     `bson:"user_id,omitempty"`
+	Active bool       `bson:"active,omitempty"`
+	Items  []CartItem `bson:"items,omitempty"`
 }
 
 func (c *Cart) ConvertToGrpcModel() *cart_grpc.CartContentResponse {
@@ -15,19 +19,18 @@ func (c *Cart) ConvertToGrpcModel() *cart_grpc.CartContentResponse {
 	}
 
 	return &cart_grpc.CartContentResponse{
-		ItemCount: int32(len(c.Items)),
 		CartItems: items,
 	}
 }
 
 type CartItem struct {
-	ID          string
-	ProductID   string
-	UserID      string
-	Title       string
-	Description string
-	Image       string
-	Price       float32
+	ID          string  `bson:"_id,omitempty"`
+	ProductID   string  `bson:"product_id,omitempty"`
+	UserID      string  `bson:"user_id,omitempty"`
+	Title       string  `bson:"title,omitempty"`
+	Description string  `bson:"description,omitempty"`
+	Image       string  `bson:"image,omitempty"`
+	Price       float32 `bson:"price,omitempty"`
 }
 
 func (c *CartItem) ConvertToGrpcModel() *cart_grpc.CartItem {

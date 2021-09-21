@@ -14,53 +14,30 @@ type Server struct {
 func (s *Server) CartContent(_ context.Context, req *cart_grpc.CartContentRequest) (*cart_grpc.CartContentResponse, error) {
 	cart, err := s.CartRepository.FindCart(req.GetUserId())
 	if err != nil {
-		return &cart_grpc.CartContentResponse{
-			ItemCount: 0,
-			CartItems: nil,
-		}, nil
+		return nil, err
 	}
 
 	return cart.ConvertToGrpcModel(), nil
 }
 
-func (s *Server) AddToCart(_ context.Context, req *cart_grpc.AddToCartRequest) (*cart_grpc.CartContentResponse, error) {
+func (s *Server) AddToCart(_ context.Context, req *cart_grpc.AddToCartRequest) (*cart_grpc.CartOperation, error) {
 	item := database.CartItem{
-		UserID:      req.GetUserId(),
-		ProductID:   req.GetProductId(),
-		Title:       req.GetTitle(),
-		Description: req.GetDescription(),
-		Price:       req.GetPrice(),
-		Image:       req.GetImage(),
+		UserID:    req.GetUserId(),
+		ProductID: req.GetProductId(),
 	}
 
 	if err := s.CartRepository.AddToCart(&item); err != nil {
 		return nil, err
 	}
 
-	cart, err := s.CartRepository.FindCart(req.GetUserId())
-	if err != nil {
-		return &cart_grpc.CartContentResponse{
-			ItemCount: 0,
-			CartItems: nil,
-		}, nil
-	}
-
-	return cart.ConvertToGrpcModel(), nil
+	return &cart_grpc.CartOperation{}, nil
 }
 
-func (s *Server) RemoveFromCart(_ context.Context, req *cart_grpc.RemoveFromCartRequest) (*cart_grpc.CartContentResponse, error) {
+func (s *Server) RemoveFromCart(_ context.Context, req *cart_grpc.RemoveFromCartRequest) (*cart_grpc.CartOperation, error) {
 	err := s.CartRepository.RemoveFromCart(req.GetCartItemId(), req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
 
-	cart, err := s.CartRepository.FindCart(req.GetUserId())
-	if err != nil {
-		return &cart_grpc.CartContentResponse{
-			ItemCount: 0,
-			CartItems: nil,
-		}, nil
-	}
-
-	return cart.ConvertToGrpcModel(), nil
+	return &cart_grpc.CartOperation{}, nil
 }

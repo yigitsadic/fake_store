@@ -1,67 +1,87 @@
 package database
 
 import (
+	"context"
 	"errors"
-	"github.com/bxcodec/faker/v3"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CartRepository struct {
-	Storage map[string]*Cart
+	Storage *mongo.Database
+	Ctx     context.Context
 }
 
 func (c *CartRepository) FlushCart(userID string) {
-	c.Storage[userID] = &Cart{UserID: userID}
+	c.Storage.Collection("cart").UpdateMany(c.Ctx,
+		bson.M{"user_id": userID},
+		bson.M{"$set": bson.M{"active": false}},
+	)
 }
 
 func (c *CartRepository) FindCart(userID string) (*Cart, error) {
-	r, ok := c.Storage[userID]
-	if ok {
-		return r, nil
+	var cart Cart
+
+	err := c.Storage.Collection("cart").FindOne(c.Ctx, bson.M{"user_id": userID, "active": true}).Decode(&cart)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &Cart{Items: nil}, nil
+		}
+
+		return nil, err
 	}
 
-	return nil, errors.New("cart not found")
+	return &cart, nil
 }
 
 func (c *CartRepository) AddToCart(item *CartItem) error {
-	item.ID = faker.UUIDHyphenated()
+	item.ID = primitive.NewObjectID().Hex()
 
-	cart, ok := c.Storage[item.UserID]
-	if !ok {
-		c.Storage[item.UserID] = &Cart{
-			UserID: item.UserID,
-			Items:  []*CartItem{item},
+	res, err := c.Storage.Collection("cart").UpdateOne(c.Ctx,
+		bson.M{"user_id": item.UserID, "active": true},
+		bson.M{
+			"$push": bson.M{
+				"items": item,
+			},
+		},
+	)
+
+	if err == nil && res.MatchedCount == 0 {
+		var cart Cart
+		cart.Active = true
+		cart.UserID = item.UserID
+		cart.Items = []CartItem{*item}
+
+		_, err = c.Storage.Collection("cart").InsertOne(c.Ctx, cart)
+		if err != nil {
+			return err
 		}
 
 		return nil
 	}
 
-	var items []*CartItem
-
-	items = append(cart.Items, item)
-
-	c.Storage[item.UserID] = &Cart{
-		UserID: item.UserID,
-		Items:  items,
-	}
-
-	return nil
+	return err
 }
 
 func (c *CartRepository) RemoveFromCart(itemID, userID string) error {
-	cart, ok := c.Storage[userID]
-	if !ok {
-		return errors.New("cart not present")
+	res, err := c.Storage.Collection("cart").UpdateOne(c.Ctx,
+		bson.M{"user_id": userID},
+		bson.M{
+			"$pull": bson.M{
+				"items": bson.M{"_id": itemID},
+			},
+		},
+	)
+
+	if err != nil {
+		return err
 	}
 
-	var present []*CartItem
-
-	for _, item := range cart.Items {
-		if item.ID != itemID {
-			present = append(present, item)
-		}
+	if res.ModifiedCount == 0 {
+		return errors.New("no rows found")
 	}
-
-	cart.Items = present
 
 	return nil
 }

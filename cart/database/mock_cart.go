@@ -2,7 +2,7 @@ package database
 
 import (
 	"errors"
-	"github.com/bxcodec/faker/v3"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockCartRepository struct {
@@ -35,21 +35,21 @@ func (c *MockCartRepository) AddToCart(item *CartItem) error {
 		return errors.New("something went wrong")
 	}
 
-	item.ID = faker.UUIDHyphenated()
+	item.ID = primitive.NewObjectID().Hex()
 
 	cart, ok := c.Storage[item.UserID]
 	if !ok {
 		c.Storage[item.UserID] = &Cart{
 			UserID: item.UserID,
-			Items:  []*CartItem{item},
+			Items:  []CartItem{*item},
 		}
 
 		return nil
 	}
 
-	var items []*CartItem
+	var items []CartItem
 
-	items = append(cart.Items, item)
+	items = append(cart.Items, *item)
 
 	c.Storage[item.UserID] = &Cart{
 		UserID: item.UserID,
@@ -69,7 +69,7 @@ func (c *MockCartRepository) RemoveFromCart(itemID, userID string) error {
 		return errors.New("cart not present")
 	}
 
-	var present []*CartItem
+	var present []CartItem
 
 	for _, item := range cart.Items {
 		if item.ID != itemID {

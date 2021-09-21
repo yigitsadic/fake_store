@@ -4,13 +4,14 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"reflect"
 	"testing"
 )
 
 func TestCartItem_ConvertToGrpcModel(t *testing.T) {
 	item := CartItem{
-		ID:          faker.UUIDHyphenated(),
+		ID:          primitive.NewObjectID().Hex(),
 		ProductID:   faker.UUIDHyphenated(),
 		UserID:      faker.UUIDHyphenated(),
 		Title:       faker.UUIDHyphenated(),
@@ -33,9 +34,9 @@ func TestCartItem_ConvertToGrpcModel(t *testing.T) {
 func TestCart_ConvertToGrpcModel(t *testing.T) {
 	cart := Cart{
 		UserID: faker.UUIDHyphenated(),
-		Items: []*CartItem{
+		Items: []CartItem{
 			{
-				ID:          faker.UUIDHyphenated(),
+				ID:          primitive.NewObjectID().Hex(),
 				ProductID:   faker.UUIDHyphenated(),
 				UserID:      faker.UUIDHyphenated(),
 				Title:       faker.UUIDHyphenated(),
@@ -50,7 +51,7 @@ func TestCart_ConvertToGrpcModel(t *testing.T) {
 	item := cart.Items[0]
 	gotCartItem := got.GetCartItems()[0]
 
-	assert.Equal(t, int32(len(cart.Items)), got.GetItemCount())
+	assert.Equal(t, len(cart.Items), len(got.GetCartItems()))
 
 	assert.Equal(t, reflect.TypeOf(got), reflect.TypeOf(&cart_grpc.CartContentResponse{}))
 	assert.Equal(t, item.ID, gotCartItem.GetId())

@@ -5,12 +5,7 @@ option go_package = "cart_grpc/cart_grpc";
 
 message AddToCartRequest {
   string userId = 1;
-
   string productId = 2;
-  string title = 3;
-  string description = 4;
-  float  price = 5;
-  string image = 6;
 }
 
 message RemoveFromCartRequest {
@@ -37,12 +32,13 @@ message CartContentRequest {
 }
 
 message CartContentResponse {
-  int32 itemCount = 1;
   repeated CartItem cartItems = 2;
 }
 
+message CartOperation {}
+
 service CartService {
   rpc CartContent(CartContentRequest) returns (CartContentResponse) {}
-  rpc AddToCart(AddToCartRequest) returns (CartContentResponse) {}
-  rpc RemoveFromCart(RemoveFromCartRequest) returns (CartContentResponse) {}
+  rpc AddToCart(AddToCartRequest) returns (CartOperation) {}
+  rpc RemoveFromCart(RemoveFromCartRequest) returns (CartOperation) {}
 }

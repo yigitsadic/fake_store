@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/cart/database"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"testing"
 )
 
@@ -16,26 +17,18 @@ func TestServer_AddToCart(t *testing.T) {
 		mockRepo := initializeMockRepo(t, false, false, false)
 		s := &Server{CartRepository: mockRepo}
 		req := generateAddToCartRequest(t, userID)
-		res, err := s.AddToCart(context.TODO(), req)
+		_, err := s.AddToCart(context.TODO(), req)
 
 		require.Nil(t, err)
-		assert.Equal(t, int32(1), res.GetItemCount())
-		assert.Equal(t, req.GetProductId(), res.GetCartItems()[0].GetProductId())
-		assert.Equal(t, req.GetTitle(), res.GetCartItems()[0].GetTitle())
-		assert.Equal(t, req.GetDescription(), res.GetCartItems()[0].GetDescription())
-		assert.Equal(t, req.GetPrice(), res.GetCartItems()[0].GetPrice())
-		assert.Equal(t, req.GetImage(), res.GetCartItems()[0].GetImage())
-		assert.True(t, res.GetCartItems()[0].GetId() != "")
-		assert.Equal(t, mockRepo.Storage[userID].Items[0].ID, res.GetCartItems()[0].GetId())
 	})
 
 	t.Run("it should add if cart present", func(t *testing.T) {
 		mockRepo := initializeMockRepo(t, false, false, false)
 		mockRepo.Storage[userID] = &database.Cart{
 			UserID: userID,
-			Items: []*database.CartItem{
+			Items: []database.CartItem{
 				{
-					ID:          "eee",
+					ID:          primitive.NewObjectID().Hex(),
 					ProductID:   "eeeee",
 					UserID:      userID,
 					Title:       "eeee",
@@ -48,10 +41,9 @@ func TestServer_AddToCart(t *testing.T) {
 
 		s := &Server{CartRepository: mockRepo}
 		req := generateAddToCartRequest(t, userID)
-		res, err := s.AddToCart(context.TODO(), req)
+		_, err := s.AddToCart(context.TODO(), req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, int32(2), res.GetItemCount())
 	})
 
 	t.Run("it should return an error if something went wrong", func(t *testing.T) {
@@ -70,9 +62,9 @@ func TestServer_CartContent(t *testing.T) {
 	mockRepo := initializeMockRepo(t, false, false, false)
 	mockRepo.Storage[userID] = &database.Cart{
 		UserID: userID,
-		Items: []*database.CartItem{
+		Items: []database.CartItem{
 			{
-				ID:          "eee",
+				ID:          primitive.NewObjectID().Hex(),
 				ProductID:   "eeeee",
 				UserID:      userID,
 				Title:       "eeee",
@@ -88,8 +80,8 @@ func TestServer_CartContent(t *testing.T) {
 		req := generateCartContentRequest(t, "NOT_EXIST")
 		res, err := s.CartContent(context.TODO(), req)
 
-		assert.Nil(t, err)
-		assert.Equal(t, int32(0), res.GetItemCount())
+		assert.NotNil(t, err)
+		assert.Nil(t, res)
 	})
 
 	t.Run("it should respond correctly if cart exists", func(t *testing.T) {
@@ -98,7 +90,7 @@ func TestServer_CartContent(t *testing.T) {
 		res, err := s.CartContent(context.TODO(), req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, int32(1), res.GetItemCount())
+		assert.Equal(t, 1, len(res.GetCartItems()))
 	})
 
 	t.Run("it should not return an error if something went wrong", func(t *testing.T) {
@@ -107,19 +99,19 @@ func TestServer_CartContent(t *testing.T) {
 		req := generateCartContentRequest(t, userID)
 		res, err := s.CartContent(context.TODO(), req)
 
-		assert.Nil(t, err)
-		assert.Equal(t, int32(0), res.GetItemCount())
+		assert.NotNil(t, err)
+		assert.Nil(t, res)
 	})
 }
 
 func TestServer_RemoveFromCart(t *testing.T) {
 	userID := "eeee"
-	cartItemID := "EWQAS"
+	cartItemID := primitive.NewObjectID().Hex()
 
 	mockRepo := initializeMockRepo(t, false, false, false)
 	mockRepo.Storage[userID] = &database.Cart{
 		UserID: userID,
-		Items: []*database.CartItem{
+		Items: []database.CartItem{
 			{
 				ID:          cartItemID,
 				ProductID:   "eeeee",
@@ -134,28 +126,25 @@ func TestServer_RemoveFromCart(t *testing.T) {
 
 	t.Run("it should return cart if not item found", func(t *testing.T) {
 		s := &Server{CartRepository: mockRepo}
-		req := generateRemoveFromCartRequest(t, "XYZ", userID)
-		res, err := s.RemoveFromCart(context.TODO(), req)
+		req := generateRemoveFromCartRequest(t, primitive.NewObjectID().Hex(), userID)
+		_, err := s.RemoveFromCart(context.TODO(), req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, 1, len(res.GetCartItems()))
 	})
 
 	t.Run("it should return nil if everything went good", func(t *testing.T) {
 		s := &Server{CartRepository: mockRepo}
 		req := generateRemoveFromCartRequest(t, cartItemID, userID)
-		res, err := s.RemoveFromCart(context.TODO(), req)
+		_, err := s.RemoveFromCart(context.TODO(), req)
 
 		assert.Nil(t, err)
-		assert.Equal(t, int32(0), res.GetItemCount())
-		assert.Equal(t, 0, len(res.GetCartItems()))
 	})
 
 	t.Run("it should return an error if something went wrong", func(t *testing.T) {
 		badRepo := initializeMockRepo(t, false, false, true)
 		badRepo.Storage[userID] = &database.Cart{
 			UserID: userID,
-			Items: []*database.CartItem{
+			Items: []database.CartItem{
 				{
 					ID:          cartItemID,
 					ProductID:   "eeeee",
@@ -197,12 +186,8 @@ func generateAddToCartRequest(t *testing.T, userID string) *cart_grpc.AddToCartR
 	t.Helper()
 
 	return &cart_grpc.AddToCartRequest{
-		UserId:      userID,
-		ProductId:   "eee",
-		Title:       "eee",
-		Description: "eee",
-		Price:       52.23,
-		Image:       "ee",
+		UserId:    userID,
+		ProductId: "eee",
 	}
 }
 

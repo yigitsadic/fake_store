@@ -1,10 +1,8 @@
 package event_listener
 
 import (
-	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/yigitsadic/fake_store/cart/database"
 	"testing"
 )
@@ -32,13 +30,8 @@ func (m *mockRepo) FlushCart(userID string) {
 func TestEventListener_ListenFlushCartEvents(t *testing.T) {
 	repo := &mockRepo{}
 
-	goodMessage := ""
+	goodMessage := `{"user_id": "434343"}`
 	badMessage := `{"message": "please delete me"}`
-
-	b, err := json.Marshal(flushCartMessage{UserID: "434343"})
-	require.Nil(t, err)
-
-	goodMessage = string(b)
 
 	t.Run("it should do nothing with bad message", func(t *testing.T) {
 		ch := make(chan *redis.Message)
