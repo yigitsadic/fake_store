@@ -16,12 +16,14 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	s := handlers.Server{}
+	s := handlers.Server{
+		JWTTokenSecret: "FAKE_STORE_AUTH",
+	}
 
 	auth_grpc.RegisterAuthServiceServer(grpcServer, &s)
 
 	log.Println("Started to serve auth grpc")
-	if err := grpcServer.Serve(lis); err != nil {
+	if err = grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve due to %s\n", err)
 	}
 }
