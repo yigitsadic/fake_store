@@ -30,7 +30,6 @@ func TestServer_AddToCart(t *testing.T) {
 				{
 					ID:          primitive.NewObjectID().Hex(),
 					ProductID:   "eeeee",
-					UserID:      userID,
 					Title:       "eeee",
 					Description: "eee",
 					Image:       "eee",
@@ -66,7 +65,6 @@ func TestServer_CartContent(t *testing.T) {
 			{
 				ID:          primitive.NewObjectID().Hex(),
 				ProductID:   "eeeee",
-				UserID:      userID,
 				Title:       "eeee",
 				Description: "eee",
 				Image:       "eee",
@@ -115,7 +113,6 @@ func TestServer_RemoveFromCart(t *testing.T) {
 			{
 				ID:          cartItemID,
 				ProductID:   "eeeee",
-				UserID:      userID,
 				Title:       "eeee",
 				Description: "eee",
 				Image:       "eee",
@@ -148,7 +145,6 @@ func TestServer_RemoveFromCart(t *testing.T) {
 				{
 					ID:          cartItemID,
 					ProductID:   "eeeee",
-					UserID:      userID,
 					Title:       "eeee",
 					Description: "eee",
 					Image:       "eee",

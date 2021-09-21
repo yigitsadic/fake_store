@@ -21,12 +21,7 @@ func (s *Server) CartContent(_ context.Context, req *cart_grpc.CartContentReques
 }
 
 func (s *Server) AddToCart(_ context.Context, req *cart_grpc.AddToCartRequest) (*cart_grpc.CartOperation, error) {
-	item := database.CartItem{
-		UserID:    req.GetUserId(),
-		ProductID: req.GetProductId(),
-	}
-
-	if err := s.CartRepository.AddToCart(&item); err != nil {
+	if err := s.CartRepository.AddToCart(req.GetUserId(), req.GetProductId()); err != nil {
 		return nil, err
 	}
 

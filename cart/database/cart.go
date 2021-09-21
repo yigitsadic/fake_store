@@ -36,11 +36,14 @@ func (c *CartRepository) FindCart(userID string) (*Cart, error) {
 	return &cart, nil
 }
 
-func (c *CartRepository) AddToCart(item *CartItem) error {
-	item.ID = primitive.NewObjectID().Hex()
+func (c *CartRepository) AddToCart(userID string, productID string) error {
+	item := CartItem{
+		ID:        primitive.NewObjectID().Hex(),
+		ProductID: productID,
+	}
 
 	res, err := c.Storage.Collection("cart").UpdateOne(c.Ctx,
-		bson.M{"user_id": item.UserID, "active": true},
+		bson.M{"user_id": userID, "active": true},
 		bson.M{
 			"$push": bson.M{
 				"items": item,
@@ -51,8 +54,8 @@ func (c *CartRepository) AddToCart(item *CartItem) error {
 	if err == nil && res.MatchedCount == 0 {
 		var cart Cart
 		cart.Active = true
-		cart.UserID = item.UserID
-		cart.Items = []CartItem{*item}
+		cart.UserID = userID
+		cart.Items = []CartItem{item}
 
 		_, err = c.Storage.Collection("cart").InsertOne(c.Ctx, cart)
 		if err != nil {

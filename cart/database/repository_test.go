@@ -13,7 +13,6 @@ func TestCartItem_ConvertToGrpcModel(t *testing.T) {
 	item := CartItem{
 		ID:          primitive.NewObjectID().Hex(),
 		ProductID:   faker.UUIDHyphenated(),
-		UserID:      faker.UUIDHyphenated(),
 		Title:       faker.UUIDHyphenated(),
 		Description: faker.UUIDHyphenated(),
 		Image:       faker.UUIDHyphenated(),
@@ -38,7 +37,6 @@ func TestCart_ConvertToGrpcModel(t *testing.T) {
 			{
 				ID:          primitive.NewObjectID().Hex(),
 				ProductID:   faker.UUIDHyphenated(),
-				UserID:      faker.UUIDHyphenated(),
 				Title:       faker.UUIDHyphenated(),
 				Description: faker.UUIDHyphenated(),
 				Image:       faker.UUIDHyphenated(),

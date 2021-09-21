@@ -26,7 +26,6 @@ func (c *Cart) ConvertToGrpcModel() *cart_grpc.CartContentResponse {
 type CartItem struct {
 	ID          string  `bson:"_id,omitempty"`
 	ProductID   string  `bson:"product_id,omitempty"`
-	UserID      string  `bson:"user_id,omitempty"`
 	Title       string  `bson:"title,omitempty"`
 	Description string  `bson:"description,omitempty"`
 	Image       string  `bson:"image,omitempty"`
@@ -46,7 +45,7 @@ func (c *CartItem) ConvertToGrpcModel() *cart_grpc.CartItem {
 
 type Repository interface {
 	FindCart(userID string) (*Cart, error)
-	AddToCart(item *CartItem) error
+	AddToCart(userID string, productID string) error
 	RemoveFromCart(itemID, userID string) error
 	FlushCart(userID string)
 }

@@ -30,18 +30,21 @@ func (c *MockCartRepository) FindCart(userID string) (*Cart, error) {
 	return nil, errors.New("cart not found")
 }
 
-func (c *MockCartRepository) AddToCart(item *CartItem) error {
+func (c *MockCartRepository) AddToCart(userID string, productID string) error {
 	if c.ErrorOnAdd {
 		return errors.New("something went wrong")
 	}
 
-	item.ID = primitive.NewObjectID().Hex()
+	item := CartItem{
+		ID:        primitive.NewObjectID().Hex(),
+		ProductID: productID,
+	}
 
-	cart, ok := c.Storage[item.UserID]
+	cart, ok := c.Storage[userID]
 	if !ok {
-		c.Storage[item.UserID] = &Cart{
-			UserID: item.UserID,
-			Items:  []CartItem{*item},
+		c.Storage[userID] = &Cart{
+			UserID: userID,
+			Items:  []CartItem{item},
 		}
 
 		return nil
@@ -49,10 +52,10 @@ func (c *MockCartRepository) AddToCart(item *CartItem) error {
 
 	var items []CartItem
 
-	items = append(cart.Items, *item)
+	items = append(cart.Items, item)
 
-	c.Storage[item.UserID] = &Cart{
-		UserID: item.UserID,
+	c.Storage[userID] = &Cart{
+		UserID: userID,
 		Items:  items,
 	}
 
