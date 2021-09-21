@@ -12,7 +12,7 @@ type Product {
   price: Float!
   image: String!
 
-  inFavourites: Boolean
+  inFavourites: Boolean!
 }
 
 type CartItem {

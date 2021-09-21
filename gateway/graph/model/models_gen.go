@@ -46,5 +46,5 @@ type Product struct {
 	Description  string  `json:"description"`
 	Price        float64 `json:"price"`
 	Image        string  `json:"image"`
-	InFavourites *bool   `json:"inFavourites"`
+	InFavourites bool    `json:"inFavourites"`
 }
