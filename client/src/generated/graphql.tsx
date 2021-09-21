@@ -17,7 +17,6 @@ export type Scalars = {
 export type Cart = {
   __typename?: 'Cart';
   items?: Maybe<Array<CartItem>>;
-  itemsCount: Scalars['Int'];
 };
 
 export type CartItem = {
@@ -30,6 +29,15 @@ export type CartItem = {
   title: Scalars['String'];
 };
 
+export type FavouriteProduct = {
+  __typename?: 'FavouriteProduct';
+  id: Scalars['ID'];
+  image?: Maybe<Scalars['String']>;
+  productID: Scalars['ID'];
+  status: Scalars['Int'];
+  title?: Maybe<Scalars['String']>;
+};
+
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   avatar: Scalars['String'];
@@ -40,9 +48,11 @@ export type LoginResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addToCart: Cart;
+  addToCart: Scalars['Boolean'];
+  addToFavourites: Scalars['Boolean'];
   login: LoginResponse;
-  removeFromCart: Cart;
+  removeFromCart: Scalars['Boolean'];
+  removeFromFavourites: Scalars['Boolean'];
   startPayment: PaymentStartResponse;
 };
 
@@ -52,8 +62,18 @@ export type MutationAddToCartArgs = {
 };
 
 
+export type MutationAddToFavouritesArgs = {
+  productID: Scalars['ID'];
+};
+
+
 export type MutationRemoveFromCartArgs = {
   cartItemId: Scalars['ID'];
+};
+
+
+export type MutationRemoveFromFavouritesArgs = {
+  productID: Scalars['ID'];
 };
 
 export type Order = {
@@ -73,6 +93,7 @@ export type Product = {
   description: Scalars['String'];
   id: Scalars['ID'];
   image: Scalars['String'];
+  inFavourites?: Maybe<Scalars['Boolean']>;
   price: Scalars['Float'];
   title: Scalars['String'];
 };
@@ -80,6 +101,7 @@ export type Product = {
 export type Query = {
   __typename?: 'Query';
   cart: Cart;
+  favouriteProducts?: Maybe<Array<FavouriteProduct>>;
   orders?: Maybe<Array<Order>>;
   product: Product;
   products?: Maybe<Array<Product>>;
@@ -105,7 +127,7 @@ export type RemoveFromCartMutationVariables = Exact<{
 }>;
 
 
-export type RemoveFromCartMutation = { __typename?: 'Mutation', removeFromCart: { __typename?: 'Cart', itemsCount: number } };
+export type RemoveFromCartMutation = { __typename?: 'Mutation', removeFromCart: boolean };
 
 export type LoginMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -122,7 +144,7 @@ export type AddItemToCartMutationVariables = Exact<{
 }>;
 
 
-export type AddItemToCartMutation = { __typename?: 'Mutation', addToCart: { __typename?: 'Cart', itemsCount: number } };
+export type AddItemToCartMutation = { __typename?: 'Mutation', addToCart: boolean };
 
 export type ProductDetailQueryVariables = Exact<{
   id: Scalars['ID'];
@@ -211,9 +233,7 @@ export type CreatePaymentLinkMutationResult = Apollo.MutationResult<CreatePaymen
 export type CreatePaymentLinkMutationOptions = Apollo.BaseMutationOptions<CreatePaymentLinkMutation, CreatePaymentLinkMutationVariables>;
 export const RemoveFromCartDocument = gql`
     mutation removeFromCart($cartItemId: ID!) {
-  removeFromCart(cartItemId: $cartItemId) {
-    itemsCount
-  }
+  removeFromCart(cartItemId: $cartItemId)
 }
     `;
 export type RemoveFromCartMutationFn = Apollo.MutationFunction<RemoveFromCartMutation, RemoveFromCartMutationVariables>;
@@ -321,9 +341,7 @@ export type ListOrdersLazyQueryHookResult = ReturnType<typeof useListOrdersLazyQ
 export type ListOrdersQueryResult = Apollo.QueryResult<ListOrdersQuery, ListOrdersQueryVariables>;
 export const AddItemToCartDocument = gql`
     mutation addItemToCart($productId: ID!) {
-  addToCart(productId: $productId) {
-    itemsCount
-  }
+  addToCart(productId: $productId)
 }
     `;
 export type AddItemToCartMutationFn = Apollo.MutationFunction<AddItemToCartMutation, AddItemToCartMutationVariables>;
