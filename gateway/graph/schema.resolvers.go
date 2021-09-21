@@ -6,12 +6,11 @@ package graph
 import (
 	"context"
 	"errors"
-	"github.com/yigitsadic/fake_store/favourites/favourites_grpc/favourites_grpc"
-	"sync"
 
-	"github.com/cenkalti/backoff/v4"
+	backoff "github.com/cenkalti/backoff/v4"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
+	"github.com/yigitsadic/fake_store/favourites/favourites_grpc/favourites_grpc"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
 	"github.com/yigitsadic/fake_store/gateway/graph/model"
 	"github.com/yigitsadic/fake_store/gateway/middlewares"
@@ -35,53 +34,38 @@ func (r *mutationResolver) Login(ctx context.Context) (*model.LoginResponse, err
 	return &res, nil
 }
 
-func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (*model.Cart, error) {
+func (r *mutationResolver) AddToCart(ctx context.Context, productID string) (bool, error) {
 	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	product, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: productID})
-	if err != nil {
-		return nil, errors.New("product not found")
-	}
-
-	res, err := r.CartService.AddToCart(ctx, &cart_grpc.AddToCartRequest{
-		UserId:      userID,
-		ProductId:   product.Id,
-		Title:       product.Title,
-		Description: product.Description,
-		Price:       product.Price,
-		Image:       product.Image,
+	_, err = r.CartService.AddToCart(ctx, &cart_grpc.AddToCartRequest{
+		UserId:    userID,
+		ProductId: productID,
 	})
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return &model.Cart{
-		Items:      convertCartFromService(res.GetCartItems()),
-		ItemsCount: int(res.GetItemCount()),
-	}, nil
+	return true, nil
 }
 
-func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string) (*model.Cart, error) {
+func (r *mutationResolver) RemoveFromCart(ctx context.Context, cartItemID string) (bool, error) {
 	userID, err := middlewares.Authenticated(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	res, err := r.CartService.RemoveFromCart(ctx, &cart_grpc.RemoveFromCartRequest{
+	_, err = r.CartService.RemoveFromCart(ctx, &cart_grpc.RemoveFromCartRequest{
 		UserId:     userID,
 		CartItemId: cartItemID,
 	})
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return &model.Cart{
-		Items:      convertCartFromService(res.GetCartItems()),
-		ItemsCount: int(res.GetItemCount()),
-	}, nil
+	return true, nil
 }
 
 func (r *mutationResolver) StartPayment(ctx context.Context) (*model.PaymentStartResponse, error) {
@@ -204,55 +188,29 @@ func (r *queryResolver) Products(ctx context.Context) ([]*model.Product, error) 
 }
 
 func (r *queryResolver) Product(ctx context.Context, id string) (*model.Product, error) {
-	var wait sync.WaitGroup
-	var inFavourite *bool
-	var errProductNotFound error
-	var product *model.Product
-
-	go func() {
-		wait.Add(1)
-		defer wait.Done()
-
-		p, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: id})
-		if err != nil {
-			errProductNotFound = err
-		} else {
-			product = &model.Product{
-				ID:          p.GetId(),
-				Title:       p.GetTitle(),
-				Description: p.GetDescription(),
-				Price:       float64(p.GetPrice()),
-				Image:       p.GetImage(),
-			}
-		}
-	}()
-
-	// if user logged in, we'll continue to add favourite
-	userID, _ := middlewares.Authenticated(ctx)
-
-	if userID != "" {
-		go func() {
-			wait.Add(1)
-			defer wait.Done()
-
-			res, err := r.FavouritesService.ProductInFavourite(ctx, &favourites_grpc.FavouritesRequest{
-				ProductID: id,
-				UserID:    userID,
-			})
-			if err != nil {
-				inFavourite = nil
-			} else {
-				*inFavourite = res.GetInFavourites()
-			}
-
-			product.InFavourites = inFavourite
-		}()
+	p, err := r.ProductsService.ProductDetail(ctx, &product_grpc.ProductDetailRequest{ProductId: id})
+	if err != nil {
+		return nil, err
 	}
 
-	wait.Wait()
+	product := &model.Product{
+		ID:          p.GetId(),
+		Title:       p.GetTitle(),
+		Description: p.GetDescription(),
+		Price:       float64(p.GetPrice()),
+		Image:       p.GetImage(),
+	}
 
-	if errProductNotFound != nil {
-		return nil, errProductNotFound
+	// if user logged in, we'll continue to add favourite
+	userID, err := middlewares.Authenticated(ctx)
+	if err != nil {
+		res, err := r.FavouritesService.ProductInFavourite(ctx, &favourites_grpc.FavouritesRequest{
+			ProductID: id,
+			UserID:    userID,
+		})
+		if err == nil {
+			product.InFavourites = res.GetInFavourites()
+		}
 	}
 
 	return product, nil
@@ -336,8 +294,7 @@ func (r *queryResolver) Cart(ctx context.Context) (*model.Cart, error) {
 	}
 
 	return &model.Cart{
-		Items:      convertCartFromService(res.GetCartItems()),
-		ItemsCount: int(res.GetItemCount()),
+		Items: convertCartFromService(res.GetCartItems()),
 	}, nil
 }
 
