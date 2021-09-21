@@ -26,7 +26,6 @@ type CartItem {
 
 type Cart {
   items: [CartItem!]
-  itemsCount: Int!
 }
 
 type Order {
@@ -62,8 +61,8 @@ type Query {
 type Mutation {
   login: LoginResponse!
 
-  addToCart(productId: ID!): Cart!
-  removeFromCart(cartItemId: ID!): Cart!
+  addToCart(productId: ID!): Boolean!
+  removeFromCart(cartItemId: ID!): Boolean!
 
   startPayment: PaymentStartResponse!
 

@@ -44,8 +44,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Cart struct {
-		Items      func(childComplexity int) int
-		ItemsCount func(childComplexity int) int
+		Items func(childComplexity int) int
 	}
 
 	CartItem struct {
@@ -111,8 +110,8 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Login(ctx context.Context) (*model.LoginResponse, error)
-	AddToCart(ctx context.Context, productID string) (*model.Cart, error)
-	RemoveFromCart(ctx context.Context, cartItemID string) (*model.Cart, error)
+	AddToCart(ctx context.Context, productID string) (bool, error)
+	RemoveFromCart(ctx context.Context, cartItemID string) (bool, error)
 	StartPayment(ctx context.Context) (*model.PaymentStartResponse, error)
 	AddToFavourites(ctx context.Context, productID string) (bool, error)
 	RemoveFromFavourites(ctx context.Context, productID string) (bool, error)
@@ -146,13 +145,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Cart.Items(childComplexity), true
-
-	case "Cart.itemsCount":
-		if e.complexity.Cart.ItemsCount == nil {
-			break
-		}
-
-		return e.complexity.Cart.ItemsCount(childComplexity), true
 
 	case "CartItem.description":
 		if e.complexity.CartItem.Description == nil {
@@ -523,7 +515,6 @@ type CartItem {
 
 type Cart {
   items: [CartItem!]
-  itemsCount: Int!
 }
 
 type Order {
@@ -559,8 +550,8 @@ type Query {
 type Mutation {
   login: LoginResponse!
 
-  addToCart(productId: ID!): Cart!
-  removeFromCart(cartItemId: ID!): Cart!
+  addToCart(productId: ID!): Boolean!
+  removeFromCart(cartItemId: ID!): Boolean!
 
   startPayment: PaymentStartResponse!
 
@@ -733,41 +724,6 @@ func (ec *executionContext) _Cart_items(ctx context.Context, field graphql.Colle
 	res := resTmp.([]*model.CartItem)
 	fc.Result = res
 	return ec.marshalOCartItem2ᚕᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐCartItemᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Cart_itemsCount(ctx context.Context, field graphql.CollectedField, obj *model.Cart) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Cart",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ItemsCount, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CartItem_id(ctx context.Context, field graphql.CollectedField, obj *model.CartItem) (ret graphql.Marshaler) {
@@ -1361,9 +1317,9 @@ func (ec *executionContext) _Mutation_addToCart(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Cart)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNCart2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐCart(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_removeFromCart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1403,9 +1359,9 @@ func (ec *executionContext) _Mutation_removeFromCart(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Cart)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNCart2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐCart(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_startPayment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3258,11 +3214,6 @@ func (ec *executionContext) _Cart(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = graphql.MarshalString("Cart")
 		case "items":
 			out.Values[i] = ec._Cart_items(ctx, field, obj)
-		case "itemsCount":
-			out.Values[i] = ec._Cart_itemsCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

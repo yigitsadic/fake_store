@@ -3,8 +3,7 @@
 package model
 
 type Cart struct {
-	Items      []*CartItem `json:"items"`
-	ItemsCount int         `json:"itemsCount"`
+	Items []*CartItem `json:"items"`
 }
 
 type CartItem struct {
