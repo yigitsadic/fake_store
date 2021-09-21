@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/yigitsadic/fake_store/products/database"
+	"github.com/yigitsadic/fake_store/products/event_handlers"
 	"github.com/yigitsadic/fake_store/products/handlers"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,6 +25,14 @@ func main() {
 		log.Fatalf("failed to listen: %v\n", err)
 	}
 
+	rdb := redis.NewClient(
+		&redis.Options{Addr: "redis:6379"},
+	)
+
+	if err = rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatalln("Unable to connect redis")
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
@@ -37,6 +48,22 @@ func main() {
 	db := client.Database("fake_store")
 
 	repo := &database.ProductRepository{Storage: db}
+
+	pubSub := rdb.Subscribe(context.Background(), event_handlers.ProductInfoPopulateChannel)
+	eventHandler := event_handlers.EventHandler{
+		PopulateCartItemFunc: func(product database.Product) {
+			b, err := json.Marshal(product)
+			if err != nil {
+				return
+			}
+
+			rdb.Publish(context.Background(), event_handlers.ProductPopulatedChannel, string(b))
+		},
+		MessageChan:       pubSub.Channel(),
+		ProductRepository: repo,
+	}
+
+	go eventHandler.ListenProductPopulateMessages()
 
 	count, err := db.Collection("product_catalog").CountDocuments(ctx, bson.D{})
 	if err != nil {
