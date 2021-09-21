@@ -19,11 +19,9 @@ func main() {
 		log.Fatalf("failed to listen: %v\n", err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
-		Password: "",
-		DB:       0,
-	})
+	rdb := redis.NewClient(
+		&redis.Options{Addr: "redis:6379"},
+	)
 
 	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatalln("Unable to connect redis")
