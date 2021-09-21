@@ -120,6 +120,8 @@ func main() {
 	// Parses JWT token in the Authorization key in header and stores it to context with key *userId*
 	r.Use(middlewares.Auth)
 
+	r.Use(middleware.Compress(2))
+
 	r.Use(middleware.Heartbeat("/readiness"))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", srv)
