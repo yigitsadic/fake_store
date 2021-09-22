@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/bxcodec/faker/v3"
 	"time"
 )
 
@@ -65,47 +64,4 @@ type Repository interface {
 	Create(referenceID, hookURL, successURL, failureURL string, amount float64) (*PaymentIntent, error)
 	FindOne(ID string) (*PaymentIntent, error)
 	MarkAsCompleted(ID string) error
-}
-
-// PaymentIntentRepository is in-memory, database mimicking struct.
-type PaymentIntentRepository struct {
-	Storage map[string]*PaymentIntent
-}
-
-// Create inserts new intent to in-memory database with given parameters.
-func (p *PaymentIntentRepository) Create(referenceID, hookURL, successURL, failureURL string, amount float64) (*PaymentIntent, error) {
-	record := PaymentIntent{
-		ID:          faker.UUIDHyphenated(),
-		Amount:      amount,
-		ReferenceID: referenceID,
-		Status:      PaymentInitialized,
-		CreatedAt:   time.Now().UTC(),
-		SuccessURL:  successURL,
-		FailureURL:  failureURL,
-		HookURL:     hookURL,
-	}
-
-	return &record, nil
-}
-
-// FindOne fetches record from in-memory database with given ID.
-func (p PaymentIntentRepository) FindOne(ID string) (*PaymentIntent, error) {
-	record, ok := p.Storage[ID]
-	if !ok {
-		return nil, errorRecordNotFound
-	}
-
-	return record, nil
-}
-
-// MarkAsCompleted marks payment as complete for given ID.
-func (p *PaymentIntentRepository) MarkAsCompleted(ID string) error {
-	record, ok := p.Storage[ID]
-	if !ok {
-		return errorRecordNotFound
-	}
-
-	record.Status = PaymentCompleted
-
-	return nil
 }
