@@ -89,7 +89,11 @@ func (c *CartRepository) AddToCart(userID string, productID string) (string, err
 		return item.ID, nil
 	}
 
-	return "", err
+	if err != nil {
+		return "", err
+	}
+
+	return item.ID, nil
 }
 
 // RemoveFromCart removes given item from cart.
