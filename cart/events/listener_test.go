@@ -1,4 +1,4 @@
-package event_listener
+package events
 
 import (
 	"github.com/go-redis/redis/v8"
@@ -14,11 +14,15 @@ var gotUserID string
 type mockRepo struct {
 }
 
+func (m mockRepo) UpdateCartItem(message database.CartItemProductMessage) {
+	panic("implement me")
+}
+
 func (m mockRepo) FindCart(userID string) (*database.Cart, error) {
 	panic("implement me")
 }
 
-func (m mockRepo) AddToCart(userID string, productID string) error {
+func (m mockRepo) AddToCart(userID string, productID string) (string, error) {
 	panic("implement me")
 }
 
@@ -44,14 +48,14 @@ func TestEventListener_ListenFlushCartEvents(t *testing.T) {
 		ch := make(chan *redis.Message)
 
 		listener := &EventListener{
-			MessageChan: ch,
-			Repository:  repo,
+			FlushCartMessageChan: ch,
+			Repository:           repo,
 		}
 
 		go listener.ListenFlushCartEvents()
 
 		ch <- &redis.Message{
-			Channel: ChannelName,
+			Channel: FlushCartChannelName,
 			Payload: badMessage,
 		}
 
@@ -68,14 +72,14 @@ func TestEventListener_ListenFlushCartEvents(t *testing.T) {
 		ch := make(chan *redis.Message)
 
 		listener := &EventListener{
-			MessageChan: ch,
-			Repository:  repo,
+			FlushCartMessageChan: ch,
+			Repository:           repo,
 		}
 
 		go listener.ListenFlushCartEvents()
 
 		ch <- &redis.Message{
-			Channel: ChannelName,
+			Channel: FlushCartChannelName,
 			Payload: goodMessage,
 		}
 

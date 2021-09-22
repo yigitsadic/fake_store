@@ -4,6 +4,17 @@ import (
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 )
 
+// CartItemProductMessage struct represents update cart function call parameter.
+type CartItemProductMessage struct {
+	ProductID   string  `json:"product_id"`
+	CartItemID  string  `json:"cart_item_id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Image       string  `json:"image"`
+	Price       float32 `json:"price"`
+}
+
+// Cart struct represents cart document in database.
 type Cart struct {
 	ID     string     `bson:"_id,omitempty"`
 	UserID string     `bson:"user_id,omitempty"`
@@ -11,6 +22,7 @@ type Cart struct {
 	Items  []CartItem `bson:"items,omitempty"`
 }
 
+// ConvertToGrpcModel converts Cart struct to gRPC compatible struct.
 func (c *Cart) ConvertToGrpcModel() *cart_grpc.CartContentResponse {
 	var items []*cart_grpc.CartItem
 
@@ -23,6 +35,7 @@ func (c *Cart) ConvertToGrpcModel() *cart_grpc.CartContentResponse {
 	}
 }
 
+// CartItem struct represents cart items in a cart.
 type CartItem struct {
 	ID          string  `bson:"_id,omitempty"`
 	ProductID   string  `bson:"product_id,omitempty"`
@@ -32,6 +45,7 @@ type CartItem struct {
 	Price       float32 `bson:"price,omitempty"`
 }
 
+// ConvertToGrpcModel converts cart item to gRPC compatible struct.
 func (c *CartItem) ConvertToGrpcModel() *cart_grpc.CartItem {
 	return &cart_grpc.CartItem{
 		Id:          c.ID,
@@ -43,9 +57,11 @@ func (c *CartItem) ConvertToGrpcModel() *cart_grpc.CartItem {
 	}
 }
 
+// Repository is an interface that contains required functionalities by handlers and event handlers.
 type Repository interface {
 	FindCart(userID string) (*Cart, error)
-	AddToCart(userID string, productID string) error
+	AddToCart(userID string, productID string) (string, error)
 	RemoveFromCart(itemID, userID string) error
 	FlushCart(userID string)
+	UpdateCartItem(message CartItemProductMessage)
 }

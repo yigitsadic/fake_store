@@ -13,9 +13,11 @@ import (
 func TestServer_AddToCart(t *testing.T) {
 	userID := "eeee"
 
+	mockRedisCallFn := func(cartItemID, productID string) {}
+
 	t.Run("it should add if cart not exist", func(t *testing.T) {
 		mockRepo := initializeMockRepo(t, false, false, false)
-		s := &Server{CartRepository: mockRepo}
+		s := &Server{CartRepository: mockRepo, PublishPopulateFunc: mockRedisCallFn}
 		req := generateAddToCartRequest(t, userID)
 		_, err := s.AddToCart(context.TODO(), req)
 
@@ -38,11 +40,35 @@ func TestServer_AddToCart(t *testing.T) {
 			},
 		}
 
-		s := &Server{CartRepository: mockRepo}
+		s := &Server{CartRepository: mockRepo, PublishPopulateFunc: mockRedisCallFn}
 		req := generateAddToCartRequest(t, userID)
 		_, err := s.AddToCart(context.TODO(), req)
 
 		assert.Nil(t, err)
+	})
+
+	t.Run("it should call product populate", func(t *testing.T) {
+		var counter int
+		var cItem, pID string
+
+		mockRepo := initializeMockRepo(t, false, false, false)
+		s := &Server{
+			CartRepository: mockRepo,
+			PublishPopulateFunc: func(cartItemID, productID string) {
+				counter++
+				cItem = cartItemID
+				pID = productID
+			},
+		}
+		req := generateAddToCartRequest(t, "hello")
+		s.AddToCart(context.TODO(), req)
+
+		for counter == 0 {
+		}
+
+		assert.Equal(t, "eee", pID)
+		assert.True(t, cItem != "")
+		assert.True(t, counter > 0)
 	})
 
 	t.Run("it should return an error if something went wrong", func(t *testing.T) {

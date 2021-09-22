@@ -13,6 +13,10 @@ type MockCartRepository struct {
 	Storage map[string]*Cart
 }
 
+func (c *MockCartRepository) UpdateCartItem(message CartItemProductMessage) {
+	panic("implement me")
+}
+
 func (c *MockCartRepository) FlushCart(userID string) {
 	c.Storage[userID] = &Cart{UserID: userID}
 }
@@ -30,9 +34,9 @@ func (c *MockCartRepository) FindCart(userID string) (*Cart, error) {
 	return nil, errors.New("cart not found")
 }
 
-func (c *MockCartRepository) AddToCart(userID string, productID string) error {
+func (c *MockCartRepository) AddToCart(userID string, productID string) (string, error) {
 	if c.ErrorOnAdd {
-		return errors.New("something went wrong")
+		return "", errors.New("something went wrong")
 	}
 
 	item := CartItem{
@@ -47,7 +51,7 @@ func (c *MockCartRepository) AddToCart(userID string, productID string) error {
 			Items:  []CartItem{item},
 		}
 
-		return nil
+		return item.ID, nil
 	}
 
 	var items []CartItem
@@ -59,7 +63,7 @@ func (c *MockCartRepository) AddToCart(userID string, productID string) error {
 		Items:  items,
 	}
 
-	return nil
+	return item.ID, nil
 }
 
 func (c *MockCartRepository) RemoveFromCart(itemID, userID string) error {
