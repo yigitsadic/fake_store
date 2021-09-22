@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
@@ -63,7 +64,7 @@ func (o *OrderRepository) Start(userID string, products []Product) (*Order, erro
 		return nil, err
 	}
 
-	order.ID = result.InsertedID.(string)
+	order.ID = result.InsertedID.(primitive.ObjectID).Hex()
 
 	return order, nil
 }
