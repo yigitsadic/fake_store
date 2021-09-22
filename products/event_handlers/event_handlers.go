@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	ProductInfoPopulateChannel = "PRODUCT_INFO_POPULATE_CHANNEL"
-	ProductPopulatedChannel    = "PRODUCT_POPULATED_CHANNEL"
+	ProductInfoPopulateChannel = "POPULATE_CART_ITEM"
+	ProductPopulatedChannel    = "CART_ITEM_POPULATED"
 )
 
 type EventHandler struct {
