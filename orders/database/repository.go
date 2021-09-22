@@ -7,13 +7,13 @@ import (
 
 // Order struct represents order.
 type Order struct {
-	ID            string
-	UserID        string
-	CreatedAt     time.Time
-	PaymentAmount float32
-	Status        orders_grpc.Order_OrderStatus
+	ID            string                        `bson:"_id,omitempty"`
+	UserID        string                        `bson:"user_id,omitempty"`
+	CreatedAt     time.Time                     `bson:"created_at,omitempty"`
+	PaymentAmount float32                       `bson:"payment_amount,omitempty"`
+	Status        orders_grpc.Order_OrderStatus `bson:"status,omitempty"`
 
-	Products []Product
+	Products []Product `bson:"products,omitempty"`
 }
 
 // ConvertToGRPCModel converts order to grpc compatible struct.
@@ -48,11 +48,11 @@ func (o OrderList) ConvertToGRPCModel() []*orders_grpc.Order {
 
 // Product struct represents product.
 type Product struct {
-	ID          string
-	Title       string
-	Description string
-	Image       string
-	Price       float32
+	ID          string  `bson:"id,omitempty"`
+	Title       string  `bson:"title,omitempty"`
+	Description string  `bson:"description,omitempty"`
+	Image       string  `bson:"image,omitempty"`
+	Price       float32 `bson:"price,omitempty"`
 }
 
 // ConvertToGRPCModel converts product to grpc compatible struct.

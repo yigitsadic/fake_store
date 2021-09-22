@@ -1,29 +1,48 @@
 package database
 
 import (
-	"errors"
-	"github.com/bxcodec/faker/v3"
+	"context"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
-// OrderRepository will mock real database connection.
+// OrderRepository handles operations in Mongo.
 type OrderRepository struct {
-	Storage map[string]*Order
+	Storage *mongo.Database
+	Ctx     context.Context
 }
 
+// FindAll fetches all completed order documents that matching with user id.
 func (o *OrderRepository) FindAll(userID string) (OrderList, error) {
+	cursor, err := o.Storage.Collection("orders").Find(o.Ctx, bson.M{
+		"user_id": userID,
+		"status":  orders_grpc.Order_COMPLETED,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	var orders OrderList
 
-	for _, order := range o.Storage {
-		if order.UserID == userID && order.Status == orders_grpc.Order_COMPLETED {
-			orders = append(orders, *order)
+	for cursor.Next(o.Ctx) {
+		var order Order
+		if err = cursor.Decode(&order); err == nil {
+			orders = append(orders, order)
 		}
 	}
+
+	if err = cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	cursor.Close(o.Ctx)
 
 	return orders, nil
 }
 
+// Start inserts new order record with state *STARTED*.
 func (o *OrderRepository) Start(userID string, products []Product) (*Order, error) {
 	var total float32
 
@@ -32,7 +51,6 @@ func (o *OrderRepository) Start(userID string, products []Product) (*Order, erro
 	}
 
 	order := &Order{
-		ID:            faker.UUIDHyphenated(),
 		UserID:        userID,
 		CreatedAt:     time.Now().UTC(),
 		PaymentAmount: total,
@@ -40,18 +58,39 @@ func (o *OrderRepository) Start(userID string, products []Product) (*Order, erro
 		Products:      products,
 	}
 
-	o.Storage[order.ID] = order
+	result, err := o.Storage.Collection("orders").InsertOne(o.Ctx, order)
+	if err != nil {
+		return nil, err
+	}
+
+	order.ID = result.InsertedID.(string)
 
 	return order, nil
 }
 
+// Complete updates status of given order id and returns userID.
 func (o *OrderRepository) Complete(orderID string) (string, error) {
-	order, ok := o.Storage[orderID]
-	if ok && order.Status != orders_grpc.Order_COMPLETED {
-		order.Status = orders_grpc.Order_COMPLETED
+	var order Order
 
-		return order.UserID, nil
-	} else {
-		return "", errors.New("order not found")
+	err := o.Storage.Collection("orders").FindOne(o.Ctx, bson.M{"_id": orderID}).Decode(&order)
+	if err != nil {
+		return "", err
 	}
+
+	userId := order.UserID
+
+	_, err = o.Storage.Collection("orders").UpdateOne(o.Ctx,
+		bson.M{
+			"_id": orderID,
+		},
+		bson.M{
+			"status": orders_grpc.Order_COMPLETED,
+		},
+	)
+
+	if err != nil {
+		return "", err
+	}
+
+	return userId, nil
 }
