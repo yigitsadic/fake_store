@@ -31,16 +31,16 @@ type PaymentHookMessage struct {
 
 // PaymentIntent represents payments both completed and started.
 type PaymentIntent struct {
-	ID          string
-	Amount      float64
-	ReferenceID string
-	Status      paymentStatus
+	ID          string        `bson:"_id,omitempty"`
+	Amount      float64       `bson:"amount,omitempty"`
+	ReferenceID string        `bson:"reference_id,omitempty"`
+	Status      paymentStatus `bson:"status,omitempty"`
 
-	CreatedAt time.Time
+	CreatedAt time.Time `bson:"created_at,omitempty"`
 
-	SuccessURL string
-	FailureURL string
-	HookURL    string
+	SuccessURL string `bson:"success_url,omitempty"`
+	FailureURL string `bson:"failure_url,omitempty"`
+	HookURL    string `bson:"hook_url,omitempty"`
 }
 
 // CreateHookMessage creates PaymentHookMessage from intent.
