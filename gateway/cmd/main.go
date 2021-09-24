@@ -8,7 +8,6 @@ import (
 	"github.com/rs/cors"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
-	"github.com/yigitsadic/fake_store/favourites/favourites_grpc/favourites_grpc"
 	"github.com/yigitsadic/fake_store/gateway/middlewares"
 	"github.com/yigitsadic/fake_store/orders/orders_grpc/orders_grpc"
 	"github.com/yigitsadic/fake_store/products/product_grpc/product_grpc"
@@ -54,7 +53,6 @@ func main() {
 	var productClient product_grpc.ProductServiceClient
 	var cartClient cart_grpc.CartServiceClient
 	var orderClient orders_grpc.OrdersServiceClient
-	var favouritesClient favourites_grpc.FavouritesServiceClient
 
 	authConnection, err := acquireConnection("auth")
 	if err != nil {
@@ -90,20 +88,11 @@ func main() {
 		defer ordersConnection.Close()
 	}
 
-	favouritesConnection, err := acquireConnection("favourites")
-	if err != nil {
-		log.Fatalf("cannot obtain orders service connection")
-	} else {
-		favouritesClient = favourites_grpc.NewFavouritesServiceClient(favouritesConnection)
-		defer favouritesConnection.Close()
-	}
-
 	resolver := graph.Resolver{
-		AuthService:       authClient,
-		ProductsService:   productClient,
-		CartService:       cartClient,
-		OrdersService:     orderClient,
-		FavouritesService: favouritesClient,
+		AuthService:     authClient,
+		ProductsService: productClient,
+		CartService:     cartClient,
+		OrdersService:   orderClient,
 
 		PaymentProviderURL: paymentProviderBaseURL,
 		FailureURL:         fmt.Sprintf("%s/payment_failed", clientBaseURL),

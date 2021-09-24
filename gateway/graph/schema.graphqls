@@ -11,8 +11,6 @@ type Product {
   description: String!
   price: Float!
   image: String!
-
-  inFavourites: Boolean!
 }
 
 type CartItem {
@@ -52,8 +50,6 @@ type Query {
   products: [Product!]
   product(ID: ID!): Product!
 
-  favouriteProducts: [FavouriteProduct!]
-
   orders: [Order!]
   cart: Cart!
 }
@@ -65,7 +61,4 @@ type Mutation {
   removeFromCart(cartItemId: ID!): Boolean!
 
   startPayment: PaymentStartResponse!
-
-  addToFavourites(productID: ID!): Boolean!
-  removeFromFavourites(productID: ID!): Boolean!
 }

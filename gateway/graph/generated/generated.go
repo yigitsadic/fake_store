@@ -72,12 +72,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddToCart            func(childComplexity int, productID string) int
-		AddToFavourites      func(childComplexity int, productID string) int
-		Login                func(childComplexity int) int
-		RemoveFromCart       func(childComplexity int, cartItemID string) int
-		RemoveFromFavourites func(childComplexity int, productID string) int
-		StartPayment         func(childComplexity int) int
+		AddToCart      func(childComplexity int, productID string) int
+		Login          func(childComplexity int) int
+		RemoveFromCart func(childComplexity int, cartItemID string) int
+		StartPayment   func(childComplexity int) int
 	}
 
 	Order struct {
@@ -91,20 +89,18 @@ type ComplexityRoot struct {
 	}
 
 	Product struct {
-		Description  func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Image        func(childComplexity int) int
-		InFavourites func(childComplexity int) int
-		Price        func(childComplexity int) int
-		Title        func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Image       func(childComplexity int) int
+		Price       func(childComplexity int) int
+		Title       func(childComplexity int) int
 	}
 
 	Query struct {
-		Cart              func(childComplexity int) int
-		FavouriteProducts func(childComplexity int) int
-		Orders            func(childComplexity int) int
-		Product           func(childComplexity int, id string) int
-		Products          func(childComplexity int) int
+		Cart     func(childComplexity int) int
+		Orders   func(childComplexity int) int
+		Product  func(childComplexity int, id string) int
+		Products func(childComplexity int) int
 	}
 }
 
@@ -113,13 +109,10 @@ type MutationResolver interface {
 	AddToCart(ctx context.Context, productID string) (bool, error)
 	RemoveFromCart(ctx context.Context, cartItemID string) (bool, error)
 	StartPayment(ctx context.Context) (*model.PaymentStartResponse, error)
-	AddToFavourites(ctx context.Context, productID string) (bool, error)
-	RemoveFromFavourites(ctx context.Context, productID string) (bool, error)
 }
 type QueryResolver interface {
 	Products(ctx context.Context) ([]*model.Product, error)
 	Product(ctx context.Context, id string) (*model.Product, error)
-	FavouriteProducts(ctx context.Context) ([]*model.FavouriteProduct, error)
 	Orders(ctx context.Context) ([]*model.Order, error)
 	Cart(ctx context.Context) (*model.Cart, error)
 }
@@ -263,18 +256,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddToCart(childComplexity, args["productId"].(string)), true
 
-	case "Mutation.addToFavourites":
-		if e.complexity.Mutation.AddToFavourites == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_addToFavourites_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AddToFavourites(childComplexity, args["productID"].(string)), true
-
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -293,18 +274,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveFromCart(childComplexity, args["cartItemId"].(string)), true
-
-	case "Mutation.removeFromFavourites":
-		if e.complexity.Mutation.RemoveFromFavourites == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_removeFromFavourites_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RemoveFromFavourites(childComplexity, args["productID"].(string)), true
 
 	case "Mutation.startPayment":
 		if e.complexity.Mutation.StartPayment == nil {
@@ -362,13 +331,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Product.Image(childComplexity), true
 
-	case "Product.inFavourites":
-		if e.complexity.Product.InFavourites == nil {
-			break
-		}
-
-		return e.complexity.Product.InFavourites(childComplexity), true
-
 	case "Product.price":
 		if e.complexity.Product.Price == nil {
 			break
@@ -389,13 +351,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Cart(childComplexity), true
-
-	case "Query.favouriteProducts":
-		if e.complexity.Query.FavouriteProducts == nil {
-			break
-		}
-
-		return e.complexity.Query.FavouriteProducts(childComplexity), true
 
 	case "Query.orders":
 		if e.complexity.Query.Orders == nil {
@@ -500,8 +455,6 @@ type Product {
   description: String!
   price: Float!
   image: String!
-
-  inFavourites: Boolean!
 }
 
 type CartItem {
@@ -541,8 +494,6 @@ type Query {
   products: [Product!]
   product(ID: ID!): Product!
 
-  favouriteProducts: [FavouriteProduct!]
-
   orders: [Order!]
   cart: Cart!
 }
@@ -554,9 +505,6 @@ type Mutation {
   removeFromCart(cartItemId: ID!): Boolean!
 
   startPayment: PaymentStartResponse!
-
-  addToFavourites(productID: ID!): Boolean!
-  removeFromFavourites(productID: ID!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -581,21 +529,6 @@ func (ec *executionContext) field_Mutation_addToCart_args(ctx context.Context, r
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_addToFavourites_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["productID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["productID"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_removeFromCart_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -608,21 +541,6 @@ func (ec *executionContext) field_Mutation_removeFromCart_args(ctx context.Conte
 		}
 	}
 	args["cartItemId"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_removeFromFavourites_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["productID"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["productID"] = arg0
 	return args, nil
 }
 
@@ -1399,90 +1317,6 @@ func (ec *executionContext) _Mutation_startPayment(ctx context.Context, field gr
 	return ec.marshalNPaymentStartResponse2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐPaymentStartResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_addToFavourites(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_addToFavourites_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddToFavourites(rctx, args["productID"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_removeFromFavourites(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_removeFromFavourites_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RemoveFromFavourites(rctx, args["productID"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Order_paymentAmount(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1795,41 +1629,6 @@ func (ec *executionContext) _Product_image(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Product_inFavourites(ctx context.Context, field graphql.CollectedField, obj *model.Product) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Product",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InFavourites, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_products(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1902,38 +1701,6 @@ func (ec *executionContext) _Query_product(ctx context.Context, field graphql.Co
 	res := resTmp.(*model.Product)
 	fc.Result = res
 	return ec.marshalNProduct2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐProduct(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_favouriteProducts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().FavouriteProducts(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.FavouriteProduct)
-	fc.Result = res
-	return ec.marshalOFavouriteProduct2ᚕᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐFavouriteProductᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_orders(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3398,16 +3165,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "addToFavourites":
-			out.Values[i] = ec._Mutation_addToFavourites(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "removeFromFavourites":
-			out.Values[i] = ec._Mutation_removeFromFavourites(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3516,11 +3273,6 @@ func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "inFavourites":
-			out.Values[i] = ec._Product_inFavourites(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3570,17 +3322,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
-				return res
-			})
-		case "favouriteProducts":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_favouriteProducts(ctx, field)
 				return res
 			})
 		case "orders":
@@ -3910,16 +3651,6 @@ func (ec *executionContext) marshalNCartItem2ᚖgithubᚗcomᚋyigitsadicᚋfake
 		return graphql.Null
 	}
 	return ec._CartItem(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNFavouriteProduct2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐFavouriteProduct(ctx context.Context, sel ast.SelectionSet, v *model.FavouriteProduct) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._FavouriteProduct(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
@@ -4343,53 +4074,6 @@ func (ec *executionContext) marshalOCartItem2ᚕᚖgithubᚗcomᚋyigitsadicᚋf
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNCartItem2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐCartItem(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalOFavouriteProduct2ᚕᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐFavouriteProductᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.FavouriteProduct) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNFavouriteProduct2ᚖgithubᚗcomᚋyigitsadicᚋfake_storeᚋgatewayᚋgraphᚋmodelᚐFavouriteProduct(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

@@ -9,7 +9,6 @@ COPY auth auth
 COPY products products
 COPY orders orders
 COPY cart cart
-COPY favourites favourites
 
 RUN go build -o gateway_service ./gateway/cmd/
 
