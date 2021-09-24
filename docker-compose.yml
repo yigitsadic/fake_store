@@ -25,8 +25,6 @@ services:
       context: .
       dockerfile: ./products/Dockerfile
     restart: on-failure
-    ports:
-      - "9000:9000"
   orders:
     build:
       context: .
@@ -42,6 +40,12 @@ services:
       context: .
       dockerfile: ./favourites/Dockerfile
     restart: on-failure
+  client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    ports:
+      - "3000:80"
   hook:
     build:
       context: .
@@ -54,3 +58,17 @@ services:
   database:
     image: mongo:4.2.16
     restart: always
+    volumes:
+      - "database_data:/data/db"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - "ME_CONFIG_MONGODB_URL=mongodb://database:27017/"
+      - "ME_CONFIG_MONGODB_ADMINUSERNAME="
+      - "ME_CONFIG_MONGODB_ADMINPASSWORD="
+volumes:
+  database_data:
