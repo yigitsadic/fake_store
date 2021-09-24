@@ -35,11 +35,6 @@ services:
       context: .
       dockerfile: ./cart/Dockerfile
     restart: on-failure
-  favourites:
-    build:
-      context: .
-      dockerfile: ./favourites/Dockerfile
-    restart: on-failure
   client:
     build:
       context: .
