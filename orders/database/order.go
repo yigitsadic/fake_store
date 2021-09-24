@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
 
@@ -17,10 +18,17 @@ type OrderRepository struct {
 
 // FindAll fetches all completed order documents that matching with user id.
 func (o *OrderRepository) FindAll(userID string) (OrderList, error) {
-	cursor, err := o.Storage.Collection("orders").Find(o.Ctx, bson.M{
-		"user_id": userID,
-		"status":  orders_grpc.Order_COMPLETED,
-	})
+	findOpts := options.Find()
+	findOpts.SetSort(bson.M{"_id": -1})
+
+	cursor, err := o.Storage.Collection("orders").Find(
+		o.Ctx,
+		bson.M{
+			"user_id": userID,
+			"status":  orders_grpc.Order_COMPLETED,
+		},
+		findOpts,
+	)
 	if err != nil {
 		return nil, err
 	}
