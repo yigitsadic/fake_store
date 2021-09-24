@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 
-	backoff "github.com/cenkalti/backoff/v4"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/yigitsadic/fake_store/auth/auth_grpc/auth_grpc"
 	"github.com/yigitsadic/fake_store/cart/cart_grpc/cart_grpc"
 	"github.com/yigitsadic/fake_store/gateway/graph/generated"
